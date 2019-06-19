@@ -2,7 +2,9 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import sys
 
+from absl import app
 from absl import flags
 
 from ._base import define_base  # pylint: disable=relative-beyond-top-level
@@ -34,6 +36,10 @@ def register_key_flags_in_core(f):
 def set_defaults(**kwargs):
   for key, value in kwargs.items():
     flags.FLAGS.set_default(name=key, value=value)
+
+def parse_flags(argv=None):
+  flags.FLAGS.unparse_flags()
+  app.parse_flags_with_usage(argv or sys.argv)
 
 
 define_base = register_key_flags_in_core(define_base)
