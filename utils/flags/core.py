@@ -5,10 +5,10 @@ from __future__ import print_function
 
 from absl import flags
 
-from ._base import define_base
-from ._performance import define_performance
-from ._benchmark import define_benchmark
-from ._device import define_device
+from ._base import define_base  # pylint: disable=relative-beyond-top-level
+from ._performance import define_performance  # pylint: disable=relative-beyond-top-level
+from ._benchmark import define_benchmark  # pylint: disable=relative-beyond-top-level
+from ._device import define_device  # pylint: disable=relative-beyond-top-level
 
 
 def register_key_flags_in_core(f):
