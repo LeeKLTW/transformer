@@ -18,9 +18,11 @@ from utils import tokenizer
 from utils import misc
 from utils.logs import logger
 
+
 class TransFormerTask(object):
-  def __int__(self,flags_obj):
+  def __init__(self, flags_obj):
     self.flags_obj = flags_obj
+
 
 def main(_):
   flags_obj = flags.FLAGS
