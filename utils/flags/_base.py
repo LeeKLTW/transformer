@@ -4,7 +4,7 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import flags
-from .core import help_wrap
+from ._conventions import help_wrap
 
 
 def define_base(data_dir=True, model_dir=True, clean=True, train_epochs=True,

@@ -25,7 +25,7 @@ from absl import flags
 from ._conventions import help_wrap
 
 
-def define_device(tpu=True):
+def define_device(tpu=False):
   """Register device specific flags.
   Args:
     tpu: Create flags to specify TPU operation.

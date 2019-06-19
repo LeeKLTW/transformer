@@ -5,8 +5,9 @@ from __future__ import print_function
 import tensorflow as tf
 
 from absl import app
+from absl import flags
 
-from utils.flags import define_transformer_flags
+from utils.flags._transformer import define_transformer_flags
 
 
 class TransFormerTask(object):
@@ -15,6 +16,8 @@ class TransFormerTask(object):
 
 
 def main(_):
+  flags_obj = flags.FLAGS
+
   pass
 
 
