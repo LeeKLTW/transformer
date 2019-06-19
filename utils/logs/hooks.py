@@ -15,3 +15,7 @@
 # ==============================================================================
 """Hook that counts examples per second every N steps or seconds."""
 
+import tensorflow as tf
+from . import logger
+
+# tf.estimator.SessionRunHook not in tf1.11
