@@ -32,6 +32,7 @@ try:
   # Looks up a codec in the Python codec registry and returns a CodecInfo obj.
   codecs.lookup("utf-8")
   help_wrap = _help_wrap
+
 except LookupError:
   def help_wrap(text, *args, **kwargs):
     return _help_wrap(text, *args, **kwargs).replace("\ufeff", "")

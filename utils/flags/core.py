@@ -36,15 +36,6 @@ def set_defaults(**kwargs):
     flags.FLAGS.set_default(name=key, value=value)
 
 
-
-def help_wrap():
-  pass
-
-
-def require_cloud_storage():
-  pass
-
-
 define_base = register_key_flags_in_core(define_base)
 define_performance = register_key_flags_in_core(define_performance)
 define_benchmark = register_key_flags_in_core(define_benchmark)
