@@ -12,6 +12,7 @@ PARAMS_MAP = {
   'big': model_params.BIG_PARAMS,
 }
 
+
 def define_transformer_flags():
   """Add flags and flag validators for running transformer_main."""
   # Add common flags (data_dir, model_dir, train_epochs, etc.).
@@ -28,7 +29,6 @@ def define_transformer_flags():
     dtype=False,
     all_reduce_alg=True
   )
-
 
   flags.DEFINE_integer(
     name='train_steps', short_name='ts', default=1000,
@@ -156,3 +156,17 @@ def define_transformer_flags():
     if flags_dict['export_dir']:
       return flags_dict['vocab_file'] is not None
     return True
+
+
+def get_model_params(param_set, num_gpus=0):
+  """Gets predefined model params."""
+  if num_gpus > 1:
+    if param_set == 'big':
+      return model_params.BIG_MULTI_GPU_PARAMS.copy()
+    elif param_set == 'base':
+      return model_params.BASE_MULTI_GPU_PARAMS.copy()
+    else:
+      raise ValueError('Not valid params: param_set={} num_gpus={}'.format(
+        param_set, num_gpus))
+
+  return PARAMS_MAP[param_set].copy()
