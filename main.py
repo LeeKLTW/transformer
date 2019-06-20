@@ -13,6 +13,7 @@ from utils.flags._transformer import define_transformer_flags, get_model_params
 from utils.flags import core
 from utils.logs import logger
 
+
 def _ensure_dir(log_dir):
   """Makes log dir if not existed."""
   if not os.path.exists(log_dir):
@@ -40,10 +41,9 @@ class TransformerTask(object):
 
     _ensure_dir(flags_obj.model_dir)
 
-    model = transformer.create_model(params, is_train)
-    opt = self._create_optimizer()
-    model.compile(opt)
-
+    model = transformer.create_model(params, is_train) #todo
+    optimizer = self._create_optimizer()
+    model.compile(optimizer)
     model.summary()
 
     pass
@@ -59,13 +59,11 @@ class TransformerTask(object):
   def _create_optimizer(self):
     """Creates optimizer."""
     params = self.params
-    opt = optimizer.LazyAdam(
-        params["learning_rate"],
-        params["optimizer_adam_beta1"],
-        params["optimizer_adam_beta2"],
-        epsilon=params["optimizer_adam_epsilon"])
-    return opt
-
+    optimizer = tf.keras.optimizers.Adam(lr=params["learning_rate"],
+                                   beta_1=params["optimizer_adam_beta1"],
+                                   beta_2=params["optimizer_adam_beta2"],
+                                   epsilon=params["optimizer_adam_epsilon"])
+    return optimizer
 
 
 def main(_):
