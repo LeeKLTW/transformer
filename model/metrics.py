@@ -43,3 +43,17 @@ def padded_cross_entropy_loss(logits, labels, smoothing, vocab_size):
 def padded_neg_log_perplexity(logits, labels, vocab_size):
   num, den = padded_cross_entropy_loss(logits, labels, 0, vocab_size)
   return -num, den
+
+
+class MetricLayer(tf.keras.layers.Layer):
+  """Custom a layer of metrics for Transformer model."""
+
+  def __init__(self, vocab_size):
+    super(MetricLayer, self).__init__()
+    self.vocab_size = vocab_size
+    self.metrics_fn = []
+
+  def build(self, input_shape):
+    neg_log_perplexity = partial(padded_neg_log_perplexity,
+                                 vocab_size=self.vocab_size)
+    self.metrics_fn = []
