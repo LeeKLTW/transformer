@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+from functools import partial
+
+import tensorflow as tf
+
+
+def _pad_tensor_to_same_length(x, y):
+  with tf.name_scope('pad_to_same_length'):
+    x_length = tf.shape(x)[1]
+    y_length = tf.shape(y)[1]
+    max_length = tf.maximum(x_length, y_length)
+
+    x = tf.pad(x, [[0, 0], [0, max_length - x_length], [0, 0]])
+    y = tf.pad(y, [[0, 0], [0, max_length - y_length]])
+  return x, y
+
+
+def padded_cross_entropy_loss(logits, labels, smoothing, vocab_size):
+  """Calculate cross entropy loss while ignoring padding."""
+  with tf.name_scope("loss"):
+    logits, labels = _pad_tensor_to_same_length(logits, labels)
+
+    with tf.name_scope("smoothing_cross_entropy"):  # smoothing=epsilon
+      confidence = 1.0 - smoothing
+      # uniform distribution
+      low_confidence = (1.0 - confidence) / tf.cast(vocab_size - 1, tf.float32)
+
+      soft_targets = tf.one_hot(indices=tf.cast(labels, tf.int32),
+                                depth=int(vocab_size), on_value=confidence,
+                                off_value=low_confidence)
+
+      # Note: labels=soft_targets
+      xentropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=logits,
+                                                         labels=soft_targets)
+  weights = tf.cast(tf.not_equal(labels, 0), tf.float32)
+  return xentropy * weights, weights
+
+
+def padded_neg_log_perplexity(logits, labels, vocab_size):
+  num, den = padded_cross_entropy_loss(logits, labels, 0, vocab_size)
+  return -num, den
