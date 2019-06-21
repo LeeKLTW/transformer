@@ -146,4 +146,11 @@ class LossLayer(keras.layers.Layer):
     self.vocab_size = vocab_size
     self.label_smoothing = label_smoothing
 
-  pass
+  def call(self, inputs, **kwargs):
+    logits, targets = inputs[0], inputs[1]
+    losses = transformer_loss(logits, targets)
+    self.add_loss(losses)
+
+  def get_config(self):
+    return {'vocab_size': self.vocab_size,
+            'label_smoothing': self.label_smoothing}
