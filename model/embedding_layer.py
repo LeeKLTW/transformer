@@ -23,7 +23,13 @@ import tensorflow as tf
 
 
 class EmbeddingSharedWeights(tf.keras.layers):
+  """Calculates input embeddings and pre-softmax linear with shared weights."""
   def __init__(self, vocab_size, hidden_size, **kwarg):
+    """Specify characteristic parameters of embedding layer.
+    Args:
+      vocab_size: Number of tokens in the embedding. (Typically ~32,000)
+      hidden_size: Dimensionality of the embedding. (Typically 512 or 1024)
+    """
     super(EmbeddingSharedWeights, self).__init__(**kwarg)
     self.vocab_size = vocab_size
     self.hidden_size = hidden_size
