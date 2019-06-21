@@ -38,7 +38,7 @@ def padded_cross_entropy_loss(logits, labels, smoothing, vocab_size):
       # Note: labels=soft_targets
       xentropy = tf.nn.softmax_cross_entropy_with_logits(logits=logits,
                                                          labels=soft_targets)
-  weights = tf.cast(tf.not_equal(labels, 0), tf.float32)
+  weights = tf.cast(tf.not_equal(labels, 0), tf.float32)  # that is not padding
 
   return xentropy * weights, weights
 
@@ -87,6 +87,7 @@ def padded_accuracy_topk(logits, labels, k):
     same_topk = tf.reduce_sum(same, axis=-1)
     return same_topk, weights
 
+
 def padded_accuracy_top5(logits, labels):
   return padded_accuracy_topk(logits, labels, 5)
 
@@ -119,6 +120,24 @@ class MetricLayer(keras.layers.Layer):
       m = mean(*fn(logits, targets), name=name)
       # todo: how to add metrics
     return logits
+
+
+def transformer_loss(logits, labels, smoothing, vocab_size):
+  """Calculates total loss containing cross entropy with padding ignored.
+
+  Args:
+    logits: Tensor of size [batch_size, length_logits, vocab_size]
+    labels: Tensor of size [batch_size, length_labels]
+    smoothing: Label smoothing constant, used to determine the on and off values
+    vocab_size: int size of the vocabulary
+
+  Returns:
+    A scalar float tensor for loss.
+  """
+  xentropy, weights = padded_cross_entropy_loss(logits, labels, smoothing,
+                                                vocab_size)
+
+  return tf.reduce_sum(xentropy) / tf.reduce_sum(weights)
 
 
 class LossLayer(keras.layers.Layer):
