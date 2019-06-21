@@ -148,7 +148,8 @@ class LossLayer(keras.layers.Layer):
 
   def call(self, inputs, **kwargs):
     logits, targets = inputs[0], inputs[1]
-    losses = transformer_loss(logits, targets)
+    losses = transformer_loss(logits, targets, self.label_smoothing,
+                              self.vocab_size)
     self.add_loss(losses)
 
   def get_config(self):
