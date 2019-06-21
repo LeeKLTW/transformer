@@ -64,3 +64,9 @@ def create_model(params, is_train):
       label_smoothing = params["label_smoothing"]
       logits = metrics.MetricLayer(vocab_size)([logits, targets])
 
+    else:
+      inputs = keras.layers.Input((None,), dtype="int64", name="inputs")
+      internal_model = Transformer(params, name="transformer")
+      _return = internal_model([inputs], training=is_train)
+      outputs, scores = _return['outputs'], _return['scores']
+      return keras.Model(inputs, [outputs, scores])
