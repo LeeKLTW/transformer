@@ -23,6 +23,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 import tensorflow as tf
+from tensorflow import keras
+
+from . import metrics  # pylint: disable=relative-beyond-top-level
+from . import embedding_layer
 
 from .metrics import MetricLayer
 
