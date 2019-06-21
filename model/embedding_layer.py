@@ -27,6 +27,9 @@ class EmbeddingSharedWeights(tf.keras.layers):
     super(EmbeddingSharedWeights, self).__init__(**kwarg)
     self.vocab_size = vocab_size
     self.hidden_size = hidden_size
+    # in version 1 matmul is considered,
+    # since it works better on TPU than gather(),
+    # on CPU, GPU, vice versa
 
   def build(self, input_shape):
     with tf.name_scope("embedding_and_softmax"):
@@ -40,6 +43,19 @@ class EmbeddingSharedWeights(tf.keras.layers):
     super(EmbeddingSharedWeights, self).build(input_shape)
 
   def call(self, inputs, mode="embedding"):
+    if mode == "embedding":
+      return self._embedding(inputs)
+
+    elif mode == 'linear':  # this is default in version 1
+      return self._linear(inputs)
+
+    else:
+      raise ValueError(f"mode {str(mode)} is not valid")
+
+  def _embedding(self, inputs):
+    pass
+
+  def _linear(self, inputs):
     pass
 
   def get_config(self):
