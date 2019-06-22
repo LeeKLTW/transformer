@@ -24,6 +24,7 @@ import tensorflow as tf
 
 class EmbeddingSharedWeights(tf.keras.layers):
   """Calculates input embeddings and pre-softmax linear with shared weights."""
+
   def __init__(self, vocab_size, hidden_size, **kwarg):
     """Specify characteristic parameters of embedding layer.
     Args:
@@ -51,14 +52,17 @@ class EmbeddingSharedWeights(tf.keras.layers):
   def call(self, inputs, mode="embedding"):
     if mode == "embedding":
       return self._embedding(inputs)
-
     elif mode == 'linear':  # this is default in version 1
       return self._linear(inputs)
-
     else:
       raise ValueError(f"mode {str(mode)} is not valid")
 
   def _embedding(self, inputs):
+    with tf.name_scope("embedding"):
+      mask = tf.cast(tf.math.not_equal(inputs,0), tf.float32)
+      embedding = tf.gather(params=self.shared_weights,indices=inputs)
+      # todo continue
+
     pass
 
   def _linear(self, inputs):
