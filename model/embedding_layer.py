@@ -60,7 +60,7 @@ class EmbeddingSharedWeights(tf.keras.layers):
   def _embedding(self, inputs):
     with tf.name_scope("embedding"):
       mask = tf.cast(tf.math.not_equal(inputs,0), tf.float32)
-      embedding = tf.gather(params=self.shared_weights,indices=inputs)
+      embedding = tf.gather(params=self.shared_weights,indices=inputs,axis=0)
       # todo continue
 
     pass
