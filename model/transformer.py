@@ -28,9 +28,16 @@ from tensorflow import keras
 from . import metrics  # pylint: disable=relative-beyond-top-level
 from . import embedding_layer
 
-from .metrics import MetricLayer
 
-class Transformer(tf.keras.Model):
+class EncoderStack(object):
+  pass
+
+
+class DecoderStack(object):
+  pass
+
+
+class Transformer(keras.Model):
   """Transformer model with Keras.
 
   Implemented as described in: https://arxiv.org/pdf/1706.03762.pdf
@@ -40,11 +47,16 @@ class Transformer(tf.keras.Model):
   representation, and the decoder uses the encoder output to generate
   probabilities for the output sequence.
   """
-  def __init__(self,params,name):
-    pass
 
-  def get_config(self):
-    pass
+  def __init__(self, params, name):
+    super(Transformer, self).__init__(name=name)
+    self.params = params
+
+    self.embedding_softmax_layer = embedding_layer.EmbeddingSharedWeights(
+      params["vocab_size"], params["hidden_size"])
+
+    self.encoder_stack = EncoderStack(params)
+    self.decoder_stack = DecoderStack(params)
 
   def call(self,inputs,training):
     pass
@@ -55,18 +67,23 @@ class Transformer(tf.keras.Model):
   def decode(self):
     pass
 
+  def get_config(self):
+    pass
 
 
 def create_model(params, is_train):
   with tf.name_scope("model"):
-    if is_train:
-      inputs = tf.keras.layers.Input((None,), dtype="int64", name="inputs")
-      targets = tf.keras.layers.Input((None,), dtype="int64", name="targets")
-      internal_model = Transformer(params,name="transformer")
+    if is_train:  # pylint: disable=no-else-return
+      inputs = keras.layers.Input((None,), dtype="int64", name="inputs")
+      targets = keras.layers.Input((None,), dtype="int64", name="targets")
+      internal_model = Transformer(params, name="transformer")
       logits = internal_model([inputs, targets], training=is_train)
       vocab_size = params["vocab_size"]
       label_smoothing = params["label_smoothing"]
-      logits = metrics.MetricLayer(vocab_size)([logits, targets])
+      # logits = metrics.MetricLayer(vocab_size)([logits, targets])
+      logits = metrics.LossLayer(vocab_size, label_smoothing)([logits, targets])
+      logits = keras.layers.Lambda(lambda x: x, name='logits')(logits)
+      return keras.Model([inputs, targets], logits)
 
     else:
       inputs = keras.layers.Input((None,), dtype="int64", name="inputs")
