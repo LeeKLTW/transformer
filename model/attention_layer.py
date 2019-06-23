@@ -72,7 +72,7 @@ class Attention(keras.layers.Layer):
       x = tf.reshape(x, [batch_size, length, self.hidden_size])
       return x
 
-  def call(self, x, y, bias, training,cache=None):  # pylint: disable=unused-argument
+  def call(self, x, y, bias, training, cache=None):
     """Apply attention mechanism to x and y.
 
     Args:
@@ -109,15 +109,16 @@ class Attention(keras.layers.Layer):
     weights = tf.nn.softmax(logits)
 
     if training:
-      weights = tf.nn.dropout(weights,keep_prob=1.0-self.attention_dropout)
+      weights = tf.nn.dropout(weights, keep_prob=1.0 - self.attention_dropout)
 
-    attention_output = tf.matmul(weights,v,transpose_b=True)
+    attention_output = tf.matmul(weights, v, transpose_b=True)
 
     attention_output = self.output_dense_layer(attention_output)
     return attention_output
 
   def get_config(self):
     pass
+
 
 class SelfAttention(Attention):
   def call(self, x, bias, training, cache=None):
