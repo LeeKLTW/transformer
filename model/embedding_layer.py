@@ -58,12 +58,14 @@ class EmbeddingSharedWeights(tf.keras.layers):
       raise ValueError(f"mode {str(mode)} is not valid")
 
   def _embedding(self, inputs):
+    """Applies embedding based on inputs tensor."""
     with tf.name_scope("embedding"):
       mask = tf.cast(tf.math.not_equal(inputs,0), tf.float32)
-      embedding = tf.gather(params=self.shared_weights,indices=inputs,axis=0)
-      # todo continue
-
-    pass
+      embeddings = tf.gather(params=self.shared_weights,indices=inputs,axis=0)
+      embeddings = embeddings * tf.expand_dims(mask,axis=-1)
+      # scale
+      embeddings = embeddings * self.hidden_size ** 0.5
+      return embeddings
 
   def _linear(self, inputs):
     pass
