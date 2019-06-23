@@ -117,7 +117,9 @@ class Attention(keras.layers.Layer):
     return attention_output
 
   def get_config(self):
-    pass
+    return {"hidden_size": self.hidden_size,
+            "num_heads": self.num_heads,
+            "attention_dropout": self.attention_dropout}
 
 
 class SelfAttention(Attention):
