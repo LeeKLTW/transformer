@@ -60,9 +60,9 @@ class EmbeddingSharedWeights(tf.keras.layers):
   def _embedding(self, inputs):
     """Applies embedding based on inputs tensor."""
     with tf.name_scope("embedding"):
-      mask = tf.cast(tf.math.not_equal(inputs,0), tf.float32)
-      embeddings = tf.gather(params=self.shared_weights,indices=inputs,axis=0)
-      embeddings = embeddings * tf.expand_dims(mask,axis=-1)
+      mask = tf.cast(tf.math.not_equal(inputs, 0), tf.float32)
+      embeddings = tf.gather(params=self.shared_weights, indices=inputs, axis=0)
+      embeddings = embeddings * tf.expand_dims(mask, axis=-1)
       # scale
       embeddings = embeddings * self.hidden_size ** 0.5
       return embeddings
