@@ -27,6 +27,16 @@ from tensorflow import keras
 
 from . import metrics  # pylint: disable=relative-beyond-top-level
 from . import embedding_layer
+from . import attention_layer
+from . import ffn_layer
+
+
+class PrePostProcessingWrapper(object):
+  pass
+
+
+class LayerNormalization(object):
+  pass
 
 
 class EncoderStack(keras.layers.Layer):
@@ -79,7 +89,7 @@ class Transformer(keras.Model):
     self.encoder_stack = EncoderStack(params)
     self.decoder_stack = DecoderStack(params)
 
-  def call(self,inputs,training):
+  def call(self, inputs, training):
     pass
 
   def encode(self):
