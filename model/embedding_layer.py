@@ -68,7 +68,20 @@ class EmbeddingSharedWeights(tf.keras.layers):
       return embeddings
 
   def _linear(self, inputs):
-    pass
+    """Computes logits by running inputs through a linear layer.
+    Args:
+      inputs: A float32 tensor with shape [batch_size, length, hidden_size]
+    Returns:
+      float32 tensor with shape [batch_size, length, vocab_size].
+    """
+    with tf.name_scope("presoftmax_linear"):
+      batch_size = tf.shape(inputs)[0]
+      length = tf.shape(inputs)[1]
+
+      x = tf.reshape(inputs, shape=(-1, self.hidden_size))
+      logits = tf.matmul(x, self.shared_weights, transpose_b=True)
+      logits = tf.reshape(logits, [batch_size, length, self.vocab_size])
+      return logits
 
   def get_config(self):
     return {
