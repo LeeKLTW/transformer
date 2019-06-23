@@ -31,11 +31,37 @@ from . import attention_layer
 from . import ffn_layer
 
 
-class PrePostProcessingWrapper(object):
-  pass
+class PrePostProcessingWrapper(keras.layers.Layer):
+  """Wrapper class that applies layer pre-processing and post-processing."""
+
+  def __init__(self, layer, params, **kwargs):
+    super(PrePostProcessingWrapper, self).__init__(**kwargs)
+    self.layer = layer
+    self.params = params
+    self.postprocess_dropout = params.get("layer_postprocess_dropout")
+
+  def build(self, input_shape):
+    self.layer_norm = LayerNormalization(self.params.get("hidden_size"))
+    super(PrePostProcessingWrapper, self).build(input_shape)
+
+  def call(self, x, *args, **kwargs):
+    """Calls wrapped layer with same parameters."""
+    # Preprocessing: apply layer normalization
+    y = self.layer_norm(x)
+    y = self.layer(y, *args, **kwargs)
+
+    training = kwargs.get("training")
+    if training:
+      y = tf.nn.dropout(y, keep_prob=1.0 - self.postprocess_dropout)
+    y = x + y  # residual
+    return y
+
+  def get_config(self):
+    return {"params": self.params}  # self.postprocess_dropout is included
 
 
-class LayerNormalization(object):
+class LayerNormalization(keras.layers.Layer):
+  """Applies layer normalization."""
   pass
 
 
