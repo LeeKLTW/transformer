@@ -20,7 +20,20 @@ class Attention(keras.layers.Layer):
     self.attention_dropout = attention_dropout
 
   def build(self, input_shape):
-    pass
+    self.q_dense_layer = \
+      keras.layers.Dense(units=self.hidden_size, use_bias=False, name='W_Q')
+
+    self.k_dense_layer = \
+      keras.layers.Dense(units=self.hidden_size, use_bias=False, name='W_K')
+
+    self.v_dense_layer = \
+      keras.layers.Dense(units=self.hidden_size, use_bias=False, name='W_V')
+
+    self.output_dense_layer = \
+      keras.layers.Dense(units=self.hidden_size, use_bias=False, name='W_O')
+
+    super(Attention, self).build(input_shape)
+
 
   # special call
   def call(self, x, bias, training, cache=None): # pylint: disable=unused-argument
