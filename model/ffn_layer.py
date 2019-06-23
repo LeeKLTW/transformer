@@ -47,4 +47,6 @@ class FeedForwardNetwork(keras.layers.Layer):
     return output
 
   def get_config(self):
-    pass
+    return {"hidden_size": self.hidden_size,
+            "filter_size": self.filter_size,
+            "relu_dropout": self.relu_dropout}
