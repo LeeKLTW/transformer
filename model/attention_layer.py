@@ -72,10 +72,50 @@ class Attention(keras.layers.Layer):
       x = tf.reshape(x,[batch_size, length, self.hidden_size])
       return x
 
-  # special call
   def call(self, x, y, bias, training,
            cache=None):  # pylint: disable=unused-argument
-    pass
+    """Apply attention mechanism to x and y.
+
+    Args:
+      x: a tensor with shape [batch_size, length_x, hidden_size]
+      y: a tensor with shape [batch_size, length_y, hidden_size]
+      bias: attention bias that will be added to the result of the dot product.
+      training: boolean, whether in training mode or not.
+      cache: (Used during prediction) dictionary with tensors containing results
+        of previous attentions. The dictionary must have the items:
+            {"k": tensor with shape [batch_size, i, key_channels],
+             "v": tensor with shape [batch_size, i, value_channels]}
+        where i is the current decoded length.
+
+    Returns:
+      Attention layer output with shape [batch_size, length_x, hidden_size]
+    """
+
+    # Multi-head attention uses multiple queries, keys, and
+    # values rather than regular attention (which uses a single q, k, v).
+    q = self.q_dense_layer(x)
+    k = self.q_dense_layer(y)
+    v = self.q_dense_layer(y)
+
+    q = self.split_heads(q)
+    k = self.split_heads(k)
+    v = self.split_heads(v)
+
+    depth = (self.hidden_size // self.num_heads)
+    scale = depth ** -0.5
+    q *= scale
+    logits = tf.matmul(q, k, transpose_b=True)
+    logits += bias
+
+    weights = tf.nn.softmax(logits)
+
+    if training:
+      weights = tf.nn.dropout(weights,keep_prob=1.0-self.attention_dropout)
+
+    attention_output = tf.matmul(weights,v,transpose_b=True)
+
+    attention_output = self.output_dense_layer(attention_output)
+    return attention_output
 
   def get_config(self):
     pass
