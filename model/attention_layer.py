@@ -34,6 +34,30 @@ class Attention(keras.layers.Layer):
 
     super(Attention, self).build(input_shape)
 
+  def split_heads(self, x):
+    """Split x into different heads, and transpose the resulting value.
+    Args:
+      x: A tensor with shape [batch_size, length, hidden_size]
+
+    Returns:
+      A tensor with shape [batch_size, num_heads, length, hidden_size/num_heads]
+
+    """
+    with tf.name_scope('split_heads'):
+      batch_size = tf.shape(x)[0]
+      length = tf.shape(x)[1]
+
+      depth = (self.hidden_size // self.num_heads)  # the dim per head
+
+      x = tf.reshape(x, (batch_size, length, depth))
+      """The tensor is transposed to insure the inner dimensions hold the 
+      correctvalues during the matrix multiplication.
+      """
+      x = tf.transpose(x, [0, 2, 1, 3])
+      return x
+
+  def combine_heads(self, x):
+    pass
 
   # special call
   def call(self, x, bias, training, cache=None): # pylint: disable=unused-argument
