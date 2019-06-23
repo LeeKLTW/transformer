@@ -57,10 +57,24 @@ class Attention(keras.layers.Layer):
       return x
 
   def combine_heads(self, x):
-    pass
+    """Combine tensor that has been split.
+
+    Args:
+      x: A tensor [batch_size, num_heads, length, hidden_size/num_heads]
+
+    Returns:
+      A tensor with shape [batch_size, length, hidden_size]
+    """
+    with tf.name_scope('combine_heads'):
+      batch_size = tf.shape(x)[0]
+      length = tf.shape(x)[2]
+      x = tf.transpose(x, [0, 2, 1, 3])
+      x = tf.reshape(x,[batch_size, length, self.hidden_size])
+      return x
 
   # special call
-  def call(self, x, bias, training, cache=None): # pylint: disable=unused-argument
+  def call(self, x, y, bias, training,
+           cache=None):  # pylint: disable=unused-argument
     pass
 
   def get_config(self):
