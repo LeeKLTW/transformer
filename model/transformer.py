@@ -29,8 +29,29 @@ from . import metrics  # pylint: disable=relative-beyond-top-level
 from . import embedding_layer
 
 
-class EncoderStack(object):
-  pass
+class EncoderStack(keras.layers.Layer):
+  def __init__(self, params):
+    super(EncoderStack, self).__init__()
+    self.params = params
+    self.layers = []
+
+  def build(self, input_shape):
+    params = self.params
+    for _ in range(params["num_hidden_layers"]):
+      self_attention_layer = attention_layer.SelfAttention(
+        params["hidden_size"], params["num_heads"], params["attention_dropout"])
+
+      feed_forward_network = ffn_layer.FeedForwardNetwork(
+        params["hidden_size"], params["filter_size"], params["relu_dropout"])
+
+      self.layers.append(
+        [PrePostProcessingWrapper(self_attention_layer, params),
+         PrePostProcessingWrapper(feed_forward_network, params)]
+      )
+
+    # ADD Norm
+    self.output_normalization = LayerNormalization(params["hidden_size"])
+    super(EncoderStack, self).build(input_shape)
 
 
 class DecoderStack(object):
