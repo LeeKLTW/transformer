@@ -11,8 +11,8 @@ class Attention(keras.layers.Layer):
   def __init__(self, hidden_size, num_heads, attention_dropout, **kwargs):
     if hidden_size % num_heads != 0:
       raise ValueError(
-        "Hidden size ({}) must be divisible by the number of heads ({})."
-          .format(hidden_size, num_heads))
+        "Hidden size ({}) must be divisible by the number of heads ({}).".format(
+          hidden_size, num_heads))
 
     super(Attention, self).__init__(**kwargs)
     self.hidden_size = hidden_size
@@ -69,11 +69,10 @@ class Attention(keras.layers.Layer):
       batch_size = tf.shape(x)[0]
       length = tf.shape(x)[2]
       x = tf.transpose(x, [0, 2, 1, 3])
-      x = tf.reshape(x,[batch_size, length, self.hidden_size])
+      x = tf.reshape(x, [batch_size, length, self.hidden_size])
       return x
 
-  def call(self, x, y, bias, training,
-           cache=None):  # pylint: disable=unused-argument
+  def call(self, x, y, bias, training,cache=None):  # pylint: disable=unused-argument
     """Apply attention mechanism to x and y.
 
     Args:
@@ -119,7 +118,6 @@ class Attention(keras.layers.Layer):
 
   def get_config(self):
     pass
-
 
 class SelfAttention(Attention):
   def call(self, x, bias, training, cache=None):
