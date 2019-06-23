@@ -14,5 +14,33 @@
 # limitations under the License.
 # ==============================================================================
 """Implementation of fully connected network."""
-class FeedForwardNetwork:
-  pass
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import tensorflow as tf
+from tensorflow import keras
+
+
+class FeedForwardNetwork(keras.layers.Layer):
+  def __init__(self, hidden_size, filter_size, relu_dropout, **kwargs):
+    super(FeedForwardNetwork, self).__init__(**kwargs)
+    self.hidden_size = hidden_size
+    self.filter_size = filter_size
+    self.relu_dropout = relu_dropout
+
+  def build(self, input_shape):
+    self.filter_dense_layer = \
+      keras.layers.Dense(units=self.filter_size,use_bias=True,
+                         activation=tf.nn.relu,name='filter_layer')
+    self.output_dense_layer = \
+      keras.layers.Dense(units=self.hidden_size,use_bias=True,
+                         activation=tf.nn.relu,name='output_layer')
+    super(FeedForwardNetwork,self).build(input_shape)
+
+  def call(self, x, training):
+    pass
+
+
+  def get_config(self):
+    pass
