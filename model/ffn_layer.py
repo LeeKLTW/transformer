@@ -14,6 +14,7 @@
 # limitations under the License.
 # ==============================================================================
 """Implementation of fully connected network."""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -31,12 +32,12 @@ class FeedForwardNetwork(keras.layers.Layer):
 
   def build(self, input_shape):
     self.filter_dense_layer = \
-      keras.layers.Dense(units=self.filter_size,use_bias=True,
-                         activation=tf.nn.relu,name='filter_layer')
+      keras.layers.Dense(units=self.filter_size, use_bias=True,
+                         activation=tf.nn.relu, name='filter_layer')
     self.output_dense_layer = \
-      keras.layers.Dense(units=self.hidden_size,use_bias=True,
-                         activation=tf.nn.relu,name='output_layer')
-    super(FeedForwardNetwork,self).build(input_shape)
+      keras.layers.Dense(units=self.hidden_size, use_bias=True,
+                         activation=tf.nn.relu, name='output_layer')
+    super(FeedForwardNetwork, self).build(input_shape)
 
   def call(self, x, training):
     pass
