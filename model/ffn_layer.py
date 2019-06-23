@@ -40,8 +40,11 @@ class FeedForwardNetwork(keras.layers.Layer):
     super(FeedForwardNetwork, self).build(input_shape)
 
   def call(self, x, training):
-    pass
-
+    output = self.filter_dense_layer(x)
+    if training:
+      output = tf.nn.dropout(output, keep_prob=1.0 - self.relu_dropout)
+    output = self.output(output)
+    return output
 
   def get_config(self):
     pass
