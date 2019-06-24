@@ -40,7 +40,7 @@ def get_padding_bias(x):
   return attention_bias
 
 
-
+# todo
 def get_position_encoding():
   """Return positional encoding.
 
