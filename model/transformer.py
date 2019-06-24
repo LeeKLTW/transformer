@@ -50,6 +50,7 @@ class PrePostProcessingWrapper(keras.layers.Layer):
     y = self.layer_norm(x)
     y = self.layer(y, *args, **kwargs)
 
+    # ADD Norm
     training = kwargs.get("training")
     if training:
       y = tf.nn.dropout(y, keep_prob=1.0 - self.postprocess_dropout)
@@ -115,9 +116,24 @@ class EncoderStack(keras.layers.Layer):
          PrePostProcessingWrapper(feed_forward_network, params)]
       )
 
-    # ADD Norm
     self.output_normalization = LayerNormalization(params["hidden_size"])
     super(EncoderStack, self).build(input_shape)
+
+  def call(self, encoder_inputs, attention_bias, training):
+
+    for idx, layers in enumerate(self.layers):
+      self_attention_layer = layers[0]
+      feed_forward_layer = layers[1]
+
+      with tf.name_scope('encoder_layer{}'.format(idx)):
+        with tf.name_scope('self_attention'):
+          y = self_attention_layer(encoder_inputs,
+                                 bias=attention_bias,training=training)
+        with tf.name_scope('ffn'):
+          y = feed_forward_layer(y, training=training)
+
+    y = self.output_normalization(y)
+    return y
 
 
 class DecoderStack(object):
