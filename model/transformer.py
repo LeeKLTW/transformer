@@ -61,8 +61,34 @@ class PrePostProcessingWrapper(keras.layers.Layer):
 
 
 class LayerNormalization(keras.layers.Layer):
-  """Applies layer normalization."""
-  pass
+  """Applies layer normalization.
+  J.Ba, J.Kiros, G.Hinton, Layer Normalization, 2016 Equation (3)
+  """
+
+  def __init__(self, hidden_size, **kwargs):
+    super(LayerNormalization, self).__init__(**kwargs)
+    self.hidden_size = hidden_size
+
+  def build(self, input_shape):
+    # todo
+    self.scale = \
+      self.add_weight(name='layer_norm_scale', shape=input_shape[-1],
+                      dtype='float32', initializer=tf.initializers.ones())
+
+    self.scale = \
+      self.add_weight(name='layer_norm_scale', shape=input_shape[-1],
+                      dtype='float32', initializer=tf.initializers.ones())
+
+    super(LayerNormalization, self).build(input_shape)
+
+  def call(self, x, epsilon=1e-6):
+    mean = tf.reduce_mean(x, axis=-1, keepdims=True)
+    variance = tf.reduce_mean()
+    # todo
+    pass
+
+  def get_config(self):
+    pass
 
 
 class EncoderStack(keras.layers.Layer):
