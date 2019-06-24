@@ -70,25 +70,29 @@ class LayerNormalization(keras.layers.Layer):
     self.hidden_size = hidden_size
 
   def build(self, input_shape):
-    # todo
     self.scale = \
       self.add_weight(name='layer_norm_scale', shape=input_shape[-1],
                       dtype='float32', initializer=tf.initializers.ones())
 
-    self.scale = \
-      self.add_weight(name='layer_norm_scale', shape=input_shape[-1],
-                      dtype='float32', initializer=tf.initializers.ones())
-
+    self.bias = \
+      self.add_weight(name='layer_norm_bias', shape=input_shape[-1],
+                      dtype='float32', initializer=tf.initializers.zeros())
     super(LayerNormalization, self).build(input_shape)
 
   def call(self, x, epsilon=1e-6):
-    mean = tf.reduce_mean(x, axis=-1, keepdims=True)
-    variance = tf.reduce_mean()
-    # todo
-    pass
+    mean = tf.reduce_mean(x, axis=[-1], keepdims=True)
+    variance = tf.reduce_mean(tf.square(mean - x), axis=[-1], keepdims=True)
+    variance = tf.sqrt(variance)
+
+    norm_x = x - mean
+    norm_x = tf.divide(norm_x, variance)
+
+    norm_x = norm_x * self.scale + self.bias
+
+    return norm_x
 
   def get_config(self):
-    pass
+    return {"hidden_size": self.hidden_size}
 
 
 class EncoderStack(keras.layers.Layer):
