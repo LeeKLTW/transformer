@@ -42,4 +42,19 @@ def get_padding_bias(x):
 
 
 def get_position_encoding():
+  """Return positional encoding.
+
+  Calculates the position encoding as a mix of sine and cosine functions with
+  geometrically increasing wavelengths.
+  Defined and formulized in Attention is All You Need, section 3.5.
+
+  Args:
+    length: Sequence length.
+    hidden_size: Size of the
+    min_timescale: Minimum scale that will be applied at each position
+    max_timescale: Maximum scale that will be applied at each position
+
+  Returns:
+    Tensor with shape [length, hidden_size]
+  """
   pass
