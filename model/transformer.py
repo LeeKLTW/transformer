@@ -29,6 +29,7 @@ from . import metrics  # pylint: disable=relative-beyond-top-level
 from . import embedding_layer
 from . import attention_layer
 from . import ffn_layer
+from utils import padding # sys.path.extend
 
 
 class PrePostProcessingWrapper(keras.layers.Layer):
@@ -162,7 +163,12 @@ class Transformer(keras.Model):
     self.decoder_stack = DecoderStack(params)
 
   def call(self, inputs, training):
-    pass
+    if len(inputs)==2:
+      inputs, targets = inputs[0],inputs[1]
+    elif len(inputs)==1:
+      inputs, targets = inputs[0],None
+    else:
+      raise ValueError(f"Length of inputs should be 2 or 1, got {len(inputs)}")
 
   def encode(self):
     pass
