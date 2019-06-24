@@ -29,7 +29,7 @@ from . import metrics  # pylint: disable=relative-beyond-top-level
 from . import embedding_layer
 from . import attention_layer
 from . import ffn_layer
-from utils import padding # sys.path.extend
+from utils import preprocessing  # sys.path.extend or export in command-line
 
 
 class PrePostProcessingWrapper(keras.layers.Layer):
@@ -129,7 +129,7 @@ class EncoderStack(keras.layers.Layer):
       with tf.name_scope('encoder_layer{}'.format(idx)):
         with tf.name_scope('self_attention'):
           y = self_attention_layer(encoder_inputs,
-                                 bias=attention_bias,training=training)
+                                   bias=attention_bias, training=training)
         with tf.name_scope('ffn'):
           y = feed_forward_layer(y, training=training)
 
@@ -163,17 +163,49 @@ class Transformer(keras.Model):
     self.decoder_stack = DecoderStack(params)
 
   def call(self, inputs, training):
-    if len(inputs)==2:
-      inputs, targets = inputs[0],inputs[1]
-    elif len(inputs)==1:
-      inputs, targets = inputs[0],None
+    if len(inputs) == 2:
+      inputs, targets = inputs[0], inputs[1]
+    elif len(inputs) == 1:
+      inputs, targets = inputs[0], None
     else:
       raise ValueError(f"Length of inputs should be 2 or 1, got {len(inputs)}")
 
-  def encode(self):
+    with tf.name_scope("Transformer"):
+      attention_bias = preprocessing.get_padding_bias(inputs)
+
+      encoder_outputs = self.encode(inputs, attention_bias, training)
+
+      if targets is None:
+        self.predict(encoder_outputs, attention_bias, training)
+      else:
+        logits = self.decode(targets, encoder_outputs, attention_bias, training)
+        return logits
+
+  def encode(self, inputs, attention_bias, training):
+    """Generate continuous representation for inputs.
+
+    Args:
+      inputs: int tensor with shape [batch_size, input_length].
+      attention_bias: float tensor with shape [batch_size, 1, 1, input_length].
+      training: boolean, whether in training mode or not.
+
+    Returns:
+      float tensor with shape [batch_size, input_length, hidden_size]
+    """
+    with tf.name_scope("encode"):
+      inputs_embedded = self.embedding_softmax_layer(inputs)
+      inputs_padding = preprocessing.get_padding(inputs)
+      with tf.name_scope("add_pos_encoding"):
+        length = tf.shape(inputs_embedded)[1]
+        pos_encoding = preprocessing.get_position_encoding()
+        #todo
     pass
 
   def decode(self):
+    pass
+
+  def predict(self, encoder_outputs, encoder_decoder_attention_bias, training):
+    """Return predicted sequence."""
     pass
 
   def get_config(self):
