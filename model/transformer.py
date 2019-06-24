@@ -162,7 +162,7 @@ class Transformer(keras.Model):
     self.encoder_stack = EncoderStack(params)
     self.decoder_stack = DecoderStack(params)
 
-  def call(self, inputs, training):
+  def call(self, inputs, training, **kwargs):
     if len(inputs) == 2:
       inputs, targets = inputs[0], inputs[1]
     elif len(inputs) == 1:
@@ -197,10 +197,21 @@ class Transformer(keras.Model):
       inputs_padding = preprocessing.get_padding(inputs)
       with tf.name_scope("add_pos_encoding"):
         length = tf.shape(inputs_embedded)[1]
-        pos_encoding = preprocessing.get_position_encoding()
-        #todo
-    pass
+        pos_encoding = preprocessing.get_position_encoding(length, self.params[
+          "hidden_size"])
+        encoder_inputs = inputs_embedded + pos_encoding
 
+      if training:
+        encoder_inputs = tf.nn.dropout(encoder_inputs,
+                                       keep_prob=1.0 - self.params[
+                                         "layer_postprocess_dropout"])
+
+      encoder_outputs = self.encoder_stack(encoder_inputs,
+                                           attention_bias=attention_bias,
+                                           training=training)
+      return encoder_outputs
+
+  # todo
   def decode(self):
     pass
 
