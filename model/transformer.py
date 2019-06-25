@@ -136,6 +136,22 @@ class EncoderStack(keras.layers.Layer):
     y = self.output_normalization(y)
     return y
 
+  def get_config(self):
+    return {
+      "params": self.params,
+    }
+
+
+class DecoderStack(keras.layers.Layer):
+  """Transformer decoder stack.
+
+  Like the encoder stack, the decoder stack is made up of N identical layers.
+  Each layer is composed of the sublayers:
+    1. Self-attention layer
+    2. Multi-headed attention layer combining encoder outputs with results from
+       the previous self-attention layer.
+    3. Feedforward network (2 fully-connected layers)
+  """
 
 class DecoderStack(object):
   pass
