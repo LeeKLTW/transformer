@@ -153,8 +153,37 @@ class DecoderStack(keras.layers.Layer):
     3. Feedforward network (2 fully-connected layers)
   """
 
-class DecoderStack(object):
-  pass
+  def __init__(self, params):
+    super(DecoderStack, self).__init__()
+    self.params = params
+    self.layers = []
+
+  def build(self, input_shape):
+    pass
+
+  #todo continue
+  def call(self, decoder_inputs, encoder_output, attention_bias, training):
+    for idx, layers in enumerate(self.layers):
+      self_attention_layer = layers[0]
+      multihead_attention_layer = layers[1]
+      feed_forward_layer = layers[2]
+
+      with tf.name_scope('decoder_layer{}'.format(idx)):
+        with tf.name_scope('self_attention'):
+          y = self_attention_layer(decoder_inputs, bias=attention_bias,
+                                   training=training)
+        with tf.name_scope('multihead_attention'):
+          y = multihead_attention_layer(y,encoder_output)
+
+        with tf.name_scope('feed_forward_layer'):
+          y = feed_forward_layer(y)
+    y = self.output_normalization(y)
+    return y
+
+  def get_config(self):
+    return {
+      "params": self.params,
+    }
 
 
 class Transformer(keras.Model):
