@@ -4,9 +4,11 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
+
 _NEG_INF = -1e9
 
-def get_padding(x, padding_value=0): # not use in encoder ??
+
+def get_padding(x, padding_value=0):  # not use in encoder ??
   """Return float tensor representing the padding values in x.
 
   Args:
@@ -19,6 +21,7 @@ def get_padding(x, padding_value=0): # not use in encoder ??
   """
   with tf.name_scope("padding"):
     return tf.cast(tf.equal(x, padding_value), tf.float32)
+
 
 def get_padding_bias(x):
   """Calculate bias tensor from padding values in tensor.
@@ -36,13 +39,16 @@ def get_padding_bias(x):
   with tf.name_scope('attention_bias'):
     padding = get_padding(x)
     attention_bias = padding * _NEG_INF
-    attention_bias = tf.expand_dims(tf.expand_dims(attention_bias,axis=1),axis=1)
+    attention_bias = tf.expand_dims(tf.expand_dims(attention_bias, axis=1),
+                                    axis=1)
   return attention_bias
 
 
-# todo
-def get_position_encoding():
+def get_position_encoding(length, hidden_size, min_timescale=1.0,
+                          max_timescale=1e4):
   """Return positional encoding.
+
+  little modification for readability.
 
   Calculates the position encoding as a mix of sine and cosine functions with
   geometrically increasing wavelengths.
@@ -57,4 +63,20 @@ def get_position_encoding():
   Returns:
     Tensor with shape [length, hidden_size]
   """
-  pass
+  num_timescales = hidden_size // 2 - 1  # 255
+
+  log_timescale_increment = float(max_timescale) / float(min_timescale)
+  log_timescale_increment = log_timescale_increment / (
+    tf.cast(num_timescales, tf.flaot32))
+
+  inv_timescales = tf.cast(tf.range(num_timescales), tf.float32)
+  inv_timescales = inv_timescales * -log_timescale_increment
+  inv_timescales = min_timescale * tf.exp(inv_timescales)
+  inv_timescales = tf.expand_dims(inv_timescales,axis=0)
+
+  scaled_time = tf.cast(tf.range(length), tf.float32)
+  scaled_time = tf.expand_dims(scaled_time,axis=-1)
+  scaled_time = scaled_time * inv_timescales
+  signal = tf.concat([tf.sin(scaled_time),tf.cos(scaled_time)],axis=1)
+
+  return signal
