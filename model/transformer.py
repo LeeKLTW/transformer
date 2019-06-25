@@ -210,9 +210,47 @@ class Transformer(keras.Model):
                                            training=training)
       return encoder_outputs
 
-  # todo
-  def decode(self):
-    pass
+  def decode(self, targets, encoder_outputs, attention_bias, training):
+    """Generate logits for each value in the target sequence.
+
+    Args:
+      targets: target values for the output sequence. int tensor with shape
+        [batch_size, target_length]
+      encoder_outputs: continuous representation of input sequence. float tensor
+        with shape [batch_size, input_length, hidden_size]
+      attention_bias: float tensor with shape [batch_size, 1, 1, input_length]
+      training: boolean, whether in training mode or not.
+
+    Returns:
+      float32 tensor with shape [batch_size, target_length, vocab_size]
+    """
+    with tf.name_scope('decode'):
+      decoder_inputs = self.embedding_softmax_layer(targets)
+      with tf.name_scope('shift_targets'):
+        # Shift targets to the right, and remove the last element
+        decoder_inputs = \
+          tf.pad(decoder_inputs, paddings=[[0, 0], [0, 1], [0, 0]])[:, :-1, :]
+      with tf.name_scope('add_pos_encoding'):
+        length = tf.shape(decoder_inputs)[1]
+        position_encoding = preprocessing.get_position_encoding(
+          length, self.params["hidden_size"])
+        decoder_inputs += position_encoding
+
+      if training:
+        decoder_inputs = tf.nn.dropout(decoder_inputs,
+                                       keep_prob=1.0 - self.params[
+                                         "layer_postprocess_dropout"])
+
+    decoder_self_attention_bias = \
+      preprocessing.get_decoder_self_attention_bias(length)
+
+    outputs = self.decoder_stack(decoder_inputs, encoder_outputs,
+                                 decoder_self_attention_bias, attention_bias,
+                                 training)
+
+    logits = self.embedding_softmax_layer(outputs)
+
+    return logits
 
   def predict(self, encoder_outputs, encoder_decoder_attention_bias, training):
     """Return predicted sequence."""
