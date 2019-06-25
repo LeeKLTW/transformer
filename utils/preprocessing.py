@@ -72,12 +72,12 @@ def get_position_encoding(length, hidden_size, min_timescale=1.0,
   inv_timescales = tf.cast(tf.range(num_timescales), tf.float32)
   inv_timescales = inv_timescales * -log_timescale_increment
   inv_timescales = min_timescale * tf.exp(inv_timescales)
-  inv_timescales = tf.expand_dims(inv_timescales,axis=0)
+  inv_timescales = tf.expand_dims(inv_timescales, axis=0)
 
   scaled_time = tf.cast(tf.range(length), tf.float32)
-  scaled_time = tf.expand_dims(scaled_time,axis=-1)
+  scaled_time = tf.expand_dims(scaled_time, axis=-1)
   scaled_time = scaled_time * inv_timescales
-  signal = tf.concat([tf.sin(scaled_time),tf.cos(scaled_time)],axis=1)
+  signal = tf.concat([tf.sin(scaled_time), tf.cos(scaled_time)], axis=1)
 
   return signal
 
@@ -95,4 +95,9 @@ def get_decoder_self_attention_bias(length):
   Returns:
     float tensor of shape [1, 1, length, length]
   """
-  return
+
+  with tf.name_scope("decoder_self_attention_bias"):
+    valid_locs = tf.linalg.band_part(tf.ones([length, length]), -1, 0) #lower triangle
+    valid_locs = tf.reshape(valid_locs, [1, 1, length, length])
+    decoder_bias = _NEG_INF * (1.0 - valid_locs)
+  return decoder_bias
