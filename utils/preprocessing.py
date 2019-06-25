@@ -80,3 +80,19 @@ def get_position_encoding(length, hidden_size, min_timescale=1.0,
   signal = tf.concat([tf.sin(scaled_time),tf.cos(scaled_time)],axis=1)
 
   return signal
+
+
+def get_decoder_self_attention_bias(length):
+  """Calculate bias for decoder that maintains model's autoregressive property.
+
+  Creates a tensor that masks out locations that correspond to illegal
+  connections, so prediction at position i cannot draw information from future
+  positions.
+
+  Args:
+    length: int length of sequences in batch.
+
+  Returns:
+    float tensor of shape [1, 1, length, length]
+  """
+  return
