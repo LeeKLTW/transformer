@@ -197,7 +197,6 @@ class Transformer(keras.Model):
       inputs_padding = preprocessing.get_padding(inputs) # ?
       with tf.name_scope("add_pos_encoding"):
         length = tf.shape(inputs_embedded)[1]
-        # todo
         pos_encoding = preprocessing.get_position_encoding(length, self.params[
           "hidden_size"])
         encoder_inputs = inputs_embedded + pos_encoding
