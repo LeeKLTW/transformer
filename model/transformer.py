@@ -260,7 +260,7 @@ class Transformer(keras.Model):
       encoder_outputs = self.encode(inputs, attention_bias, training)
 
       if targets is None:
-        self.predict(encoder_outputs, attention_bias, training)
+        return self.predict(encoder_outputs, attention_bias, training)
       else:
         logits = self.decode(targets, encoder_outputs, attention_bias, training)
         return logits
@@ -369,7 +369,37 @@ class Transformer(keras.Model):
 
   # todo
   def _get_symbols_to_logits_fn(self, max_decode_length, training):
-    pass
+    """Returns a decoding function that calculates logits of the next tokens."""
+    timing_signal = \
+      preprocessing.get_position_encoding(max_decode_length + 1,
+                                          self.params["hidden_size"])
+    decoder_self_attention_bias = preprocessing.get_decoder_self_attention_bias(
+      max_decode_length)
+
+    def symbols_to_logits_fn(ids, i):
+      """Generate logits for next potential IDs.
+      Args:
+        ids: Current decoded sequences. int tensor with shape [batch_size *
+          beam_size, i + 1]
+        i: Loop index
+
+      Returns:
+        Tuple of
+          (logits with shape [batch_size * beam_size, vocab_size])
+      """
+      decoder_input = ids[:, -1:]
+      decoder_input = self.embedding_softmax_layer(decoder_input)
+      decoder_input += timing_signal[i:i + 1]
+
+      self_attention_bias = decoder_self_attention_bias[:, :, i:i + 1, :i + 1]
+      decoder_outputs = self.decoder_stack(decoder_inputs=decoder_input,
+                                           encoder_output='', #fixme
+                                           decoder_self_attention_bias=self_attention_bias,
+                                           training=training, cache=cache)
+      logits = self.embedding_softmax_layer(decoder_outputs,mode='linear')
+      logits = tf.squeeze(logits, axis=[1])
+      return logits #,cache #fixme
+    return symbols_to_logits_fn
 
 
 def create_model(params, is_train):
