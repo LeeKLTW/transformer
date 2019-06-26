@@ -100,7 +100,7 @@ class SequenceBeamSearch(object):
 
     return finished_seq, finished_scores
 
-  #todo continue read it again
+  #todo continue
   def _create_initial_state(self, initial_ids, initial_cache):
     """Return initial state dictionary and its shape invariants.
 
