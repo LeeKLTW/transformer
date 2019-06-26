@@ -100,7 +100,7 @@ class SequenceBeamSearch(object):
 
     return finished_seq, finished_scores
 
-  #todo
+  #todo continue read it again
   def _create_initial_state(self, initial_ids, initial_cache):
     """Return initial state dictionary and its shape invariants.
 
@@ -123,18 +123,13 @@ class SequenceBeamSearch(object):
     # Create tensor for storing initial log probabilities.
     # Assume initial_ids are prob 1.0
     initial_log_probs = tf.constant(
-        [[0.] + [-float("inf")] * (self.beam_size - 1)])
+        [[0.] + [-float("inf")] * (self.beam_size - 1)])# [[0.0, -inf, -inf ...]
     alive_log_probs = tf.tile(initial_log_probs, [self.batch_size, 1])
-
 
     # Expand all values stored in the dictionary to the beam size, so that each
     # beam has a separate cache.
     alive_cache = nest.map_structure(
         lambda t: _expand_to_beam_size(t, self.beam_size), initial_cache)
-
-    # Initialize tensor storing finished sequences with filler values.
-    finished_seq = tf.zeros(tf.shape(alive_seq), tf.int32)
-
     # Initialize tensor storing finished sequences with filler values.
     finished_seq = tf.zeros(tf.shape(alive_seq), tf.int32)
 
