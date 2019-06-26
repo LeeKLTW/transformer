@@ -52,13 +52,18 @@ class EmbeddingSharedWeights(tf.keras.layers):
   def call(self, inputs, mode="embedding"):
     if mode == "embedding":
       return self._embedding(inputs)
-    elif mode == 'linear':  # this is default in version 1
+    elif mode == 'linear':
       return self._linear(inputs)
     else:
       raise ValueError(f"mode {str(mode)} is not valid")
 
   def _embedding(self, inputs):
-    """Applies embedding based on inputs tensor."""
+    """Applies embedding based on inputs tensor.
+    Args:
+      inputs: An int64 tensor with shape [batch_size, length]
+    Returns:
+      embedding:float32 tensor with shape [batch_size, length, embedding_size]
+    """
     with tf.name_scope("embedding"):
       mask = tf.cast(tf.math.not_equal(inputs, 0), tf.float32)
       embeddings = tf.gather(params=self.shared_weights, indices=inputs, axis=0)
@@ -69,6 +74,7 @@ class EmbeddingSharedWeights(tf.keras.layers):
 
   def _linear(self, inputs):
     """Computes logits by running inputs through a linear layer.
+
     Args:
       inputs: A float32 tensor with shape [batch_size, length, hidden_size]
     Returns:
