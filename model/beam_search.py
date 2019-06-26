@@ -4,6 +4,8 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
+from tensorflow.python.util import nest
+INF = 1. * 1e7
 
 
 class _StateKeys:
@@ -52,6 +54,9 @@ def _expand_to_beam_size(tensor, beam_size):
   Returns:
     Tiled tensor [batch_size, beam_size, ...]
   """
+  pass
+
+def _get_shape_keep_last_dim(tensor):
   pass
 
 
@@ -108,7 +113,65 @@ class SequenceBeamSearch(object):
     Returns:
         state and shape invariant dictionaries with keys from _StateKeys
     """
-    pass
+    # Current loop index (starts at 0)
+    cur_index = tf.constant(0)
+
+    # Create alive sequence with shape [batch_size, beam_size, 1]
+    alive_seq = _expand_to_beam_size(initial_ids, self.beam_size)
+    alive_seq = tf.expand_dims(alive_seq, axis=2)
+
+    # Create tensor for storing initial log probabilities.
+    # Assume initial_ids are prob 1.0
+    initial_log_probs = tf.constant(
+        [[0.] + [-float("inf")] * (self.beam_size - 1)])
+    alive_log_probs = tf.tile(initial_log_probs, [self.batch_size, 1])
+
+
+    # Expand all values stored in the dictionary to the beam size, so that each
+    # beam has a separate cache.
+    alive_cache = nest.map_structure(
+        lambda t: _expand_to_beam_size(t, self.beam_size), initial_cache)
+
+    # Initialize tensor storing finished sequences with filler values.
+    finished_seq = tf.zeros(tf.shape(alive_seq), tf.int32)
+
+    # Initialize tensor storing finished sequences with filler values.
+    finished_seq = tf.zeros(tf.shape(alive_seq), tf.int32)
+
+    # Set scores of the initial finished seqs to negative infinity.
+    finished_scores = tf.ones([self.batch_size, self.beam_size]) * -INF
+
+    # Initialize finished flags with all False values.
+    finished_flags = tf.zeros([self.batch_size, self.beam_size], tf.bool)
+
+    # Create state dictionary
+    state = {
+        _StateKeys.CUR_INDEX: cur_index,
+        _StateKeys.ALIVE_SEQ: alive_seq,
+        _StateKeys.ALIVE_LOG_PROBS: alive_log_probs,
+        _StateKeys.ALIVE_CACHE: alive_cache,
+        _StateKeys.FINISHED_SEQ: finished_seq,
+        _StateKeys.FINISHED_SCORES: finished_scores,
+        _StateKeys.FINISHED_FLAGS: finished_flags
+    }
+
+    # Create state invariants for each value in the state dictionary. Each
+    # dimension must be a constant or None. A None dimension means either:
+    #   1) the dimension's value is a tensor that remains the same but may
+    #      depend on the input sequence to the model (e.g. batch size).
+    #   2) the dimension may have different values on different iterations.
+    state_shape_invariants = {
+        _StateKeys.CUR_INDEX: tf.TensorShape([]),
+        _StateKeys.ALIVE_SEQ: tf.TensorShape([None, self.beam_size, None]),
+        _StateKeys.ALIVE_LOG_PROBS: tf.TensorShape([None, self.beam_size]),
+        _StateKeys.ALIVE_CACHE: nest.map_structure(
+            _get_shape_keep_last_dim, alive_cache),
+        _StateKeys.FINISHED_SEQ: tf.TensorShape([None, self.beam_size, None]),
+        _StateKeys.FINISHED_SCORES: tf.TensorShape([None, self.beam_size]),
+        _StateKeys.FINISHED_FLAGS: tf.TensorShape([None, self.beam_size])
+    }
+
+    return state, state_shape_invariants
 
   #todo
   def _continue_search(self, state):
@@ -182,3 +245,4 @@ def sequence_beam_search(symbols_to_logits_fn, initial_ids, initial_cache,
   sbs = SequenceBeamSearch(symbols_to_logits_fn, vocab_size, batch_size,
                            beam_size, alpha, max_decode_length, eos_id)
   return sbs.search(initial_ids, initial_cache)
+
