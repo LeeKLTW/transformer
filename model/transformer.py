@@ -159,7 +159,24 @@ class DecoderStack(keras.layers.Layer):
     self.layers = []
 
   def build(self, input_shape):
-    pass
+    params = self.params
+    for _ in range(params["num_hidden_layers"]):
+      self_attention_layer = attention_layer.SelfAttention(
+        params["hidden_size"], params["num_heads"], params["attention_dropout"])
+      encdec_attention_layer = attention_layer.Attention(
+        params["hidden_size"], params["num_heads"], params["attention_dropout"])
+      feed_forward_layer = ffn_layer.FeedForwardNetwork(params["hidden_size"],
+                                                        params["filter_size"],
+                                                        params["relu_dropout"])
+
+      self.layers.append([
+        PrePostProcessingWrapper(self_attention_layer,params),
+        PrePostProcessingWrapper(encdec_attention_layer,params),
+        PrePostProcessingWrapper(feed_forward_layer,params),
+      ])
+    self.output_normalization = LayerNormalization(params['hidden_size'])
+
+    super(DecoderStack, self).build(input_shape)
 
   def call(self, decoder_inputs, encoder_output, decoder_self_attention_bias,
            training):
