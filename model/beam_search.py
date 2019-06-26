@@ -188,6 +188,11 @@ class SequenceBeamSearch(object):
       Bool tensor with value True if loop should continue, False if loop should
       terminate.
     """
+    i = state[_StateKeys.CUR_INDEX]
+    alive_log_probs = state[_StateKeys.ALIVE_LOG_PROBS]
+    finished_scores = state[_StateKeys.FINISHED_SCORES]
+    finished_flags = state[_StateKeys.FINISHED_FLAGS]
+
     pass
 
   def _search_step(self, state):
