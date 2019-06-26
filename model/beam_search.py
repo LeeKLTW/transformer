@@ -43,7 +43,6 @@ class _StateKeys:
   FINISHED_FLAGS = "FINISHED_FLAGS"
 
 
-#todo
 def _expand_to_beam_size(tensor, beam_size):
   """Tiles a given tensor by beam_size.
 
@@ -54,7 +53,11 @@ def _expand_to_beam_size(tensor, beam_size):
   Returns:
     Tiled tensor [batch_size, beam_size, ...]
   """
-  pass
+  tensor = tf.expand_dims(tensor, axis=1)
+  tile_dims = [1] * tensor.shape.ndims
+  tile_dims[1] = beam_size
+
+  return tf.tile(tensor, tile_dims)
 
 def _get_shape_keep_last_dim(tensor):
   pass
