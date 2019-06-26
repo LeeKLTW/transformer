@@ -182,7 +182,7 @@ class DecoderStack(keras.layers.Layer):
     super(DecoderStack, self).build(input_shape)
 
   def call(self, decoder_inputs, encoder_output, decoder_self_attention_bias,
-           training):
+           training,cache=None):
     """Return the output of the decoder layer stacks.
 
     Args:
@@ -193,21 +193,30 @@ class DecoderStack(keras.layers.Layer):
       attention_bias: bias for encoder-decoder attention layer. [batch_size, 1,
         1, input_length]
       training: boolean, whether in training mode or not.
+      cache: (Used for fast decoding) A nested dictionary storing previous
+        decoder self-attention values. The items are:
+          {layer_n: {"k": tensor with shape [batch_size, i, key_channels],
+                     "v": tensor with shape [batch_size, i, value_channels]},
+                       ...}
 
     Returns:
       Output of decoder layer stack.
       float32 tensor with shape [batch_size, target_length, hidden_size]
     """
+
     for idx, layers in enumerate(self.layers):
       self_attention_layer = layers[0]
       encdec_attention_layer = layers[1]
       feed_forward_layer = layers[2]
 
+      layer_name = "layer_{}".format(idx)
+      layer_cache = cache.get(layer_name,None) if cache is not None else None
+
       with tf.name_scope('decoder_layer{}'.format(idx)):
         with tf.name_scope('self_attention'):
           y = self_attention_layer(decoder_inputs,
                                    bias=decoder_self_attention_bias,
-                                   training=training)
+                                   training=training,cache=layer_cache)
         with tf.name_scope('encdec_attention'):
           y = encdec_attention_layer(y, encoder_output,
                                      bias=decoder_self_attention_bias,
@@ -347,6 +356,20 @@ class Transformer(keras.Model):
 
     initial_ids = tf.zeros([batch_size], dtype=tf.int32)
 
+    # Create cache storing decoder attention values for each layer.
+    # pylint: disable=g-complex-comprehension
+    cache = {
+        "layer_{}".format(layer): {
+            "k": tf.zeros([batch_size, 0, self.params["hidden_size"]]),
+            "v": tf.zeros([batch_size, 0, self.params["hidden_size"]])
+        } for layer in range(self.params["num_hidden_layers"])
+    }
+
+    # Add encoder output and attention bias to the cache.
+    cache["encoder_outputs"] = encoder_outputs
+    cache["encoder_decoder_attention_bias"] = encoder_decoder_attention_bias
+
+
     decoded_ids, scores = beam_search.sequence_beam_search(
       symbols_to_logits_fn=symbols_to_logits_fn,
       initial_ids=initial_ids,
@@ -367,7 +390,6 @@ class Transformer(keras.Model):
   def get_config(self):
     pass
 
-  # todo
   def _get_symbols_to_logits_fn(self, max_decode_length, training):
     """Returns a decoding function that calculates logits of the next tokens."""
     timing_signal = \
