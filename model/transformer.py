@@ -376,12 +376,14 @@ class Transformer(keras.Model):
     decoder_self_attention_bias = preprocessing.get_decoder_self_attention_bias(
       max_decode_length)
 
-    def symbols_to_logits_fn(ids, i):
+    def symbols_to_logits_fn(ids, i,cache):
       """Generate logits for next potential IDs.
       Args:
         ids: Current decoded sequences. int tensor with shape [batch_size *
           beam_size, i + 1]
         i: Loop index
+        cache: dictionary of values storing the encoder output, encoder-decoder
+        attention bias, and previous decoder attention values.
 
       Returns:
         Tuple of
@@ -393,12 +395,12 @@ class Transformer(keras.Model):
 
       self_attention_bias = decoder_self_attention_bias[:, :, i:i + 1, :i + 1]
       decoder_outputs = self.decoder_stack(decoder_inputs=decoder_input,
-                                           encoder_output='', #fixme
+                                           encoder_output=cache.get("encoder_outputs"),
                                            decoder_self_attention_bias=self_attention_bias,
                                            training=training, cache=cache)
       logits = self.embedding_softmax_layer(decoder_outputs,mode='linear')
       logits = tf.squeeze(logits, axis=[1])
-      return logits #,cache #fixme
+      return logits, cache
     return symbols_to_logits_fn
 
 
