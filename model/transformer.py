@@ -29,7 +29,10 @@ from . import metrics  # pylint: disable=relative-beyond-top-level
 from . import embedding_layer
 from . import attention_layer
 from . import ffn_layer
+from . import beam_search
 from utils import preprocessing  # sys.path.extend or export in command-line
+
+EOS_ID = 1
 
 
 class PrePostProcessingWrapper(keras.layers.Layer):
@@ -170,9 +173,9 @@ class DecoderStack(keras.layers.Layer):
                                                         params["relu_dropout"])
 
       self.layers.append([
-        PrePostProcessingWrapper(self_attention_layer,params),
-        PrePostProcessingWrapper(encdec_attention_layer,params),
-        PrePostProcessingWrapper(feed_forward_layer,params),
+        PrePostProcessingWrapper(self_attention_layer, params),
+        PrePostProcessingWrapper(encdec_attention_layer, params),
+        PrePostProcessingWrapper(feed_forward_layer, params),
       ])
     self.output_normalization = LayerNormalization(params['hidden_size'])
 
@@ -335,9 +338,37 @@ class Transformer(keras.Model):
 
   def predict(self, encoder_outputs, encoder_decoder_attention_bias, training):
     """Return predicted sequence."""
+    batch_size = tf.shape(encoder_outputs)[0]
+    input_length = tf.shape(encoder_outputs)[1]
+    max_decode_length = input_length + self.params["extra_decode_length"]
+
+    symbols_to_logits_fn = self._get_symbols_to_logits_fn(max_decode_length,
+                                                          training)
+
+    initial_ids = tf.zeros([batch_size], dtype=tf.int32)
+
+    decoded_ids, scores = beam_search.sequence_beam_search(
+      symbols_to_logits_fn=symbols_to_logits_fn,
+      initial_ids=initial_ids,
+      vocab_size=self.params["vocab_size"],
+      beam_size=self.params["beam_size"],
+      alpha=self.params["alpha"],
+      max_decode_length=max_decode_length,
+      eos_id=EOS_ID
+    )
+
+    # Get the top sequence for each batch element
+    top_decoded_ids = decoded_ids[:, 0, 1:]
+    top_scores = scores[:, 0]
+
+    return {"outputs": top_decoded_ids, "scores": top_scores}
+
+  # todo
+  def get_config(self):
     pass
 
-  def get_config(self):
+  # todo
+  def _get_symbols_to_logits_fn(self, max_decode_length, training):
     pass
 
 
