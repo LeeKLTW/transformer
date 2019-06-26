@@ -369,10 +369,11 @@ class Transformer(keras.Model):
     cache["encoder_outputs"] = encoder_outputs
     cache["encoder_decoder_attention_bias"] = encoder_decoder_attention_bias
 
-
+    # Use beam search to find the top beam_size sequences and scores.
     decoded_ids, scores = beam_search.sequence_beam_search(
       symbols_to_logits_fn=symbols_to_logits_fn,
       initial_ids=initial_ids,
+      initial_cache=cache,
       vocab_size=self.params["vocab_size"],
       beam_size=self.params["beam_size"],
       alpha=self.params["alpha"],
@@ -416,13 +417,17 @@ class Transformer(keras.Model):
       decoder_input += timing_signal[i:i + 1]
 
       self_attention_bias = decoder_self_attention_bias[:, :, i:i + 1, :i + 1]
-      decoder_outputs = self.decoder_stack(decoder_inputs=decoder_input,
-                                           encoder_output=cache.get("encoder_outputs"),
-                                           decoder_self_attention_bias=self_attention_bias,
-                                           training=training, cache=cache)
+      decoder_outputs = self.decoder_stack(
+        decoder_inputs=decoder_input,
+        encoder_output=cache.get("encoder_outputs"),
+        decoder_self_attention_bias=self_attention_bias,
+        training=training,
+        cache=cache)
+
       logits = self.embedding_softmax_layer(decoder_outputs,mode='linear')
       logits = tf.squeeze(logits, axis=[1])
       return logits, cache
+
     return symbols_to_logits_fn
 
 
