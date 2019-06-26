@@ -161,22 +161,41 @@ class DecoderStack(keras.layers.Layer):
   def build(self, input_shape):
     pass
 
-  #todo continue
-  def call(self, decoder_inputs, encoder_output, attention_bias, training):
+  def call(self, decoder_inputs, encoder_output, decoder_self_attention_bias,
+           training):
+    """Return the output of the decoder layer stacks.
+
+    Args:
+      decoder_inputs: tensor with shape [batch_size, target_length, hidden_size]
+      encoder_outputs: tensor with shape [batch_size, input_length, hidden_size]
+      decoder_self_attention_bias: bias for decoder self-attention layer. [1, 1,
+        target_len, target_length]
+      attention_bias: bias for encoder-decoder attention layer. [batch_size, 1,
+        1, input_length]
+      training: boolean, whether in training mode or not.
+
+    Returns:
+      Output of decoder layer stack.
+      float32 tensor with shape [batch_size, target_length, hidden_size]
+    """
     for idx, layers in enumerate(self.layers):
       self_attention_layer = layers[0]
-      multihead_attention_layer = layers[1]
+      encdec_attention_layer = layers[1]
       feed_forward_layer = layers[2]
 
       with tf.name_scope('decoder_layer{}'.format(idx)):
         with tf.name_scope('self_attention'):
-          y = self_attention_layer(decoder_inputs, bias=attention_bias,
+          y = self_attention_layer(decoder_inputs,
+                                   bias=decoder_self_attention_bias,
                                    training=training)
-        with tf.name_scope('multihead_attention'):
-          y = multihead_attention_layer(y,encoder_output)
+        with tf.name_scope('encdec_attention'):
+          y = encdec_attention_layer(y, encoder_output,
+                                     bias=decoder_self_attention_bias,
+                                     training=training)
 
         with tf.name_scope('feed_forward_layer'):
-          y = feed_forward_layer(y)
+          y = feed_forward_layer(y, training=training)
+
     y = self.output_normalization(y)
     return y
 
