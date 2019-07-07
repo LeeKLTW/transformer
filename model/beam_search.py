@@ -193,6 +193,15 @@ class SequenceBeamSearch(object):
     finished_scores = state[_StateKeys.FINISHED_SCORES]
     finished_flags = state[_StateKeys.FINISHED_FLAGS]
 
+    not_at_max_decode_length = tf.less(i, self.max_decode_length)
+
+    # Calculate largest length penalty (the larger penalty, the better score).
+    max_length_norm = _length_normalization(self.alpha, self.max_decode_length)
+    # Get the best possible scores from alive sequences.
+    best_alive_scores = alive_log_probs[:, 0] / max_length_norm
+
+
+
     pass
 
   def _search_step(self, state):
