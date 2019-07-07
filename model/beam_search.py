@@ -63,6 +63,12 @@ def _get_shape_keep_last_dim(tensor):
   pass
 
 
+def _length_normalization(alpha, length):
+  """Return length normalization factor."""
+  return tf.pow(((5. + tf.cast(length, tf.float32)) / 6.), alpha)
+
+
+
 class SequenceBeamSearch(object):
   def __init__(self, symbols_to_logits_fn, vocab_size, batch_size,
                beam_size, alpha, max_decode_length, eos_id):
