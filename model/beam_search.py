@@ -5,6 +5,8 @@ from __future__ import print_function
 
 import tensorflow as tf
 from tensorflow.python.util import nest
+
+# Default value for INF
 INF = 1. * 1e7
 
 
