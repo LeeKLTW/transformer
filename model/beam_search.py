@@ -10,7 +10,7 @@ from tensorflow.python.util import nest
 INF = 1. * 1e7
 
 
-class _StateKeys:
+class _StateKeys(object):
   """Keys to dictionary storing the state of the beam search loop."""
 
   # Variable storing the loop index.
