@@ -21,7 +21,6 @@ class _StateKeys(object):
   # finished and moved to the FINISHED_SEQ tensor.
   # Has shape [batch_size, beam_size, CUR_INDEX + 1]
   ALIVE_SEQ = "ALIVE_SEQ"
-
   # Log probabilities of each alive sequence. Shape [batch_size, beam_size]
   ALIVE_LOG_PROBS = "ALIVE_LOG_PROBS"
 
