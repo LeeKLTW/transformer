@@ -23,7 +23,6 @@ class _StateKeys(object):
   ALIVE_SEQ = "ALIVE_SEQ"
   # Log probabilities of each alive sequence. Shape [batch_size, beam_size]
   ALIVE_LOG_PROBS = "ALIVE_LOG_PROBS"
-
   # Dictionary of cached values for each alive sequence. The cache stores
   # the encoder output, attention bias, and the decoder attention output from
   # the previous iteration.
