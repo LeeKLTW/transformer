@@ -264,3 +264,7 @@ def sequence_beam_search(symbols_to_logits_fn, initial_ids, initial_cache,
                            beam_size, alpha, max_decode_length, eos_id)
   return sbs.search(initial_ids, initial_cache)
 
+def sequence_beam_search(symbols_to_logits_fn, initial_ids, initial_cache, vocab_size, beam_size,
+    alpha, max_decode_length, eos_id):
+  """Search for sequence of subtoken ids with the largest probability."""
+  pass
