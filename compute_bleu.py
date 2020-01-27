@@ -10,6 +10,7 @@ from absl import flags
 
 from utils.flags import core as flags_core
 from utils import tokenizer
+from utils import metrics
 
 
 def bleu_tokenize(x):
