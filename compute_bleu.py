@@ -3,6 +3,11 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import re
+import sys
+import unicodedata
+
+import six
 
 import tensorflow as tf
 from absl import app as absl_app
@@ -12,15 +17,21 @@ from utils.flags import core as flags_core
 from utils import tokenizer
 from utils import metrics
 
-#TODO
+
 class UnicodeRegex(object):
   def __init__(self):
-    pass
-  def nondigit_punct_re(self):
-    pass
+    punctuation = self.property_chars("p")
+    self.nondigit_punct_re = re.compile(r"([^\d])([" + punctuation + r"])")
+    self.punct_nondigit_re = re.compile(r"([" + punctuation + ")([^\d]])")
+    self.symbol_re = re.compile(r"(["+self.property_chars("S")+"])")
+
+  def property_chars(self, prefix):
+    return "".join(six.unichr(x) for x in range(sys.maxunicode)
+                   if unicodedata.category(six.unichr(x)).startswith(prefix))
 
 
 urgex = UnicodeRegex()
+
 
 def bleu_tokenize(string):
   r"""Tokenize a string following the official BLEU implementation.
@@ -44,7 +55,7 @@ def bleu_tokenize(string):
   """
   string = urgex.nondigit_punct_re.sub(r"\1 \2", string)
   string = urgex.punct_nondigit_re.sub(r" \1 \2", string)
-  string = urgex.symbol_re.sub(r" \1 ",string)
+  string = urgex.symbol_re.sub(r" \1 ", string)
   return string.split()
 
 
