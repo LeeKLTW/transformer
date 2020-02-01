@@ -17,8 +17,23 @@ INF = int(1e9)
 BLEU_DUR = "bleu"
 _SINGLE_SAMPLE = 1
 
-#TODO
+
 class TransformerTask(object):
+  """Main entry of Transformer model."""
+  def __init__(self, flags_obj):
+    self.flags_obj = flags_obj
+    self.predict_model = None
+    num_gpus = flags_core.get_num_gpus(flags_obj)
+    self.params = params = misc.get_model_params(flags_obj.param_set, num_gpus)
+
+    params["num_gpus"] = num_gpus
+    params["use_ctl"] = flags_obj.use_ctl
+    params["data_dir"] = flags_obj.data_dir
+    params["model_dir"] = flags_obj.model_dir
+    params["static_batch"] = flags_obj.static_batch
+    params["max_length"] = flags_obj.max_length
+    # TODO: continue
+
   pass
 
 
