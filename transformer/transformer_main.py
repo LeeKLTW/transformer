@@ -9,6 +9,7 @@ from absl import logging
 
 from transformer import misc
 from utils.logs import logger
+from utils.misc import keras_utils
 
 INF = int(1e9)
 BLEU_DUR = "bleu"
@@ -23,6 +24,15 @@ def main(_):
   flags_obj = flags.FLAGS
   with logger.benchmark_context(flags_obj):
     task = TransformerTask(flags_obj)
+
+    if flags_obj.tf_gpu_thread_mode:
+      keras_utils.set_gpu_thread_mode_and_count(
+        per_gpu_thread_count=flags_obj.per_gpu_thread_count,
+        gpu_thread_mode=flags_obj.tf_gpu_thread_mode,
+        num_gpus=flags_obj.num_gpus,
+        datasets_num_private_threads=flags_obj.datasets_num_private_threads)
+
+
     #TODO: continue
   pass
 
