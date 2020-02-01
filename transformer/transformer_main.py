@@ -32,9 +32,15 @@ def main(_):
         num_gpus=flags_obj.num_gpus,
         datasets_num_private_threads=flags_obj.datasets_num_private_threads)
 
+    if flags_obj.mode == "train":
+      task.train()
+    elif flags_obj.mode == "predict":
+      task.predict()
+    elif flags_obj.mode == "eval":
+      task.eval()
+    else:
+      raise ValueError("Invalid mode {}".format(flags_obj.mode))
 
-    #TODO: continue
-  pass
 
 if __name__ == "__main__":
   logging.set_verbosity(logging.DEBUG)
