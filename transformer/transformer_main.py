@@ -4,16 +4,19 @@ from __future__ import division
 from __future__ import print_function
 
 from absl import logging
-from absl import app
 
 from transformer import misc
+from utils.logs import logger
 
 INF = int(1e9)
 BLEU_DUR = "bleu"
 _SINGLE_SAMPLE = 1
 
 def main(_):
-  #TODO: continue
+  flags_obj = flags.FLAGS
+  with logger.benchmark_context(flags_obj):
+    task = TransformerTask(flags_obj)
+    #TODO: continue
   pass
 
 if __name__ == "__main__":
