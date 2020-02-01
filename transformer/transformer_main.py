@@ -8,8 +8,10 @@ from absl import flags
 from absl import logging
 
 from transformer import misc
-from utils.logs import logger
-from utils.misc import keras_utils
+from transformer.utils.logs import logger
+from transformer.utils.misc import keras_utils
+from transformer.utils.flags import core as flags_core
+
 
 INF = int(1e9)
 BLEU_DUR = "bleu"
