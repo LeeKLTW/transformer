@@ -34,6 +34,27 @@ def get_distribution_strategy(distribution_strategy="mirrored",
     raise ValueError("`num_gpu` can not be negative.")
 
   distribution_strategy = distribution_strategy.lower()
-  # TODO: continue the distribution_strategy cases
+  if distribution_strategy == "off":
+    if num_gpus > 1:
+      raise ValueError("When {} GPUs are specified, distribution_strategy flag "
+                       "cannot be set to `off`.".format(num_gpus))
+    return None
+
+  if distribution_strategy == "tpu":
+    cluster_resolver = tpu_lib.tpu_initialize(tpu_address)
+    return tf.distribute.experimental.TPUStrategy(cluster_resolver)
+
+  if distribution_strategy == "multi_worker_mirrored":
+    return tf.distribute.experimental.MultiWorkerMirroredStrategy(
+      communication=_collective_communication(all_reduce_alg)
+    )
+
+  if distribution_strategy == "one_device":
+    if num_gpus == 0:
+      return tf.distribute.OneDeviceStrategy(device="device:CPU:0")
+    if num_gpus > 1:
+      raise ValueError("`OneDeviceStrategy` can not be used for more than "
+                       "one device.")
+    return tf.distribute.OneDeviceStrategy(device="device:GPU:0")
 
   pass
