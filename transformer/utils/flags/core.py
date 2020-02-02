@@ -13,6 +13,8 @@ import tensorflow as tf
 from absl import app as absl_app
 from absl import flags
 
+from transformer.utils.logs import hooks_helper
+
 DTYPE_MAP = {
   "fp16": tf.float16,
   "bf16": tf.bfloat16,
@@ -91,7 +93,44 @@ def get_loss_scale(flags_obj, default_for_fp16):
 
 
 
+  if num_gpu:
+    flags.DEFINE_integer(
+      name="num_gpu", short_name="ng", default=1,
+      help=help_wrap("How many GPUs to use at each worker with the "
+                     "DistributionStrategies API. The default is 1."))
 
-#TODO
-def define_base(num_gpu, distribution_strategy):
-  pass
+  if run_eagerly:
+    flags.DEFINE_boolean(
+      name="run_eagerly", default=False,
+      help=help_wrap("Run the model op by op without building model function."))
+
+  if hooks:
+    hook_list_str = (u"\ufeff Hook:\n" + u"\n".join(
+      [u"\ufeee    {}".format(key) for key in hooks_helper.HOOKS]))
+    flags.DEFINE_string(
+      name="hooks", short_name="hk", default="LoggingTensorHook",
+      help=help_wrap(u"A list of (case insensitive) strings to specify the name "
+                     u" of training hooks. \n{}\n\ufeff Example `--hooks "
+                     u"ProfileHook, ExamplePerSecondHook`. \n "
+                     u"See transformer.utils.logs.hooks_helper for detail.".format(hook_list_str)))
+    key_flags.append("hooks")
+
+  if export_dir:
+    flags.DEFINE_string(
+      name="export_dir", short_name="ed", default=None,
+      help=help_wrap("If set, a SavedModel serialization of the model will be "
+                     "export to this directory at the end of training. See README "
+                     "for more details and relevant links."))
+    key_flags.append("export_dir")
+
+  if distribution_strategy:
+    flags.DEFINE_string(
+      name="distribution_strategy", short_name="ds", default="mirrored",
+      help=help_wrap("The Distribution Strategy to use for traing. Accepted "
+                     "values are 'off', 'one_device', 'mirrred',"
+                     "'parameter_server', 'collective', case insensitive. 'off' "
+                     "means not to use Ditribution Strategy; 'default' means to "
+                     "choose from 'MirroredStrategy' or 'OneDevicesStrategy' "
+                     "according to the number of GPUs."))
+    key_flags.append("distribution_strategy")
+  return key_flags
