@@ -25,3 +25,15 @@ def get_tf_dtype(flags_obj):
     return tf.float32
   return DTYPE_MAP[flags_obj.dtype]
 
+def get_loss_scale(flags_obj, default_for_fp16):
+  if flags_obj.loss_scale == "dynamic":
+    return flags_obj.loss_scale
+  elif flags_obj.loss_scale is not None:
+    return float(flags_obj.loss_scale)
+  elif flags_obj.loss_scale == "fp32":
+    return 1 # No loss scaling is needed for fp32
+  else:
+    assert flags_obj.dtype == "fp16"
+    return default_for_fp16
+
+  pass
