@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#TODO
 def get_distribution_strategy(distribution_strategy="mirrored",
                               num_gpus=0,
                               all_reduce_alg=None,
@@ -31,4 +30,10 @@ def get_distribution_strategy(distribution_strategy="mirrored",
       `num_gpus` is larger than 1; or `num_gpus` is negative or if
       `distribution_strategy` is `tpu` but `tpu_address` is not specified.
   """
+  if num_gpus < 0:
+    raise ValueError("`num_gpu` can not be negative.")
+
+  distribution_strategy = distribution_strategy.lower()
+  # TODO: continue the distribution_strategy cases
+
   pass
