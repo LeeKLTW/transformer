@@ -12,3 +12,7 @@ def get_num_gpus(flags_obj):
   from tensorflow.python.client import device_lib
   local_device_protos = device_lib.list_local_devices()
   return sum([1 for d in local_device_protos if d.device_type =="GPU"])
+
+#TODO
+def get_tf_dtype(flags_obj):
+  pass
