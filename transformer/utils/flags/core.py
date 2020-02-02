@@ -20,6 +20,28 @@ DTYPE_MAP = {
 }
 
 
+def register_key_flags_in_core(f):
+  """Defines a function in core.py, and registers its key flags.
+
+  absl uses the location of a flags.declare_key_flag() to determine the context
+  in which a flag is key. By making all declares in core, this allows model
+  main functions to call flags.adopt_module_key_flags() on core and correctly
+  chain key flags.
+
+  Args:
+    f:  The function to be wrapped
+
+  Returns:
+    The "core-defined" version of the input function.
+  """
+
+  def core_fn(*args, **kwargs):
+    key_flags = f(*args, **kwargs)
+    [flags.declare_key_flag(flag) for flag in key_flags]
+
+  return core_fn
+
+
 _help_wrap = functools.partial(
   flags.text_wrap, length=80, indent="", firstline_indent="\n")
 
