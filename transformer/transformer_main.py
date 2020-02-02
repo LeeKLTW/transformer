@@ -46,7 +46,19 @@ class TransformerTask(object):
     params["enable_metrics_in_training"] = flags_obj.enable_metrics_in_training
     params["steps_between_evals"] = flags_obj.steps_between_evals
 
-    self.distribution_strategy = distribution_utils.get_distribution_strategy()
+    self.distribution_strategy = distribution_utils.get_distribution_strategy(
+      distribution_strategy=flags_obj.distribution_strategy,
+      num_gpus=num_gpus,
+      all_reduce_alg=flags_obj.all_reduce_alg,
+      num_packs=flags_obj.num_packs,
+      tpu_address=flags_obj.tpu or "")
+
+    if self.use_tpu:
+      params["num_replicas"] = self.distribution_strategy.num_replicas_in_sync
+      if not params["static_batch"]:
+        raise ValueError("TPU requies static batch for input data.")
+    else:
+      logging.info("Running transformer with num_gpus = %d", num_gpus)
 
     # TODO: continue
 
