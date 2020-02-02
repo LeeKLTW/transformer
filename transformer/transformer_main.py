@@ -66,10 +66,15 @@ class TransformerTask(object):
       logging.info("Not using any distribution strategy.")
 
     if params["dtype"]== tf.float16:
-      pass
+      loss_scale = flags_core.get_loss_scale(flags_obj,
+                                             default_for_fp16="dynamic")
+      policy = tf.keras.mixed_precision.experimental.Policy(
+        name="mixed_float16",loss_scale=loss_scale)
+      tf.keras.mixed_precision.experimental.set_policy(policy)
     elif params["dtype"] == tf.bfloat16:
-      pass
-    # TODO: continue
+      policy = tf.keras.mixed_precision.experimental.Policy(
+        name="mixed_bfloat16")
+      tf.keras.mixed_precision.experimental.set_policy(policy)
 
   @property
   def use_tpu(self):
