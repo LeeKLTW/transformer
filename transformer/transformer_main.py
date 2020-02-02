@@ -60,6 +60,15 @@ class TransformerTask(object):
     else:
       logging.info("Running transformer with num_gpus = %d", num_gpus)
 
+    if self.distribution_strategy:
+      logging.info("For training, using distribution strategy: %s",self.distribution_strategy)
+    else:
+      logging.info("Not using any distribution strategy.")
+
+    if params["dtype"]== tf.float16:
+      pass
+    elif params["dtype"] == tf.bfloat16:
+      pass
     # TODO: continue
 
   @property
