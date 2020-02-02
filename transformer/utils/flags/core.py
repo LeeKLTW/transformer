@@ -66,3 +66,10 @@ def get_loss_scale(flags_obj, default_for_fp16):
   else:
     assert flags_obj.dtype == "fp16"
     return default_for_fp16
+
+
+
+
+#TODO
+def define_base(num_gpu, distribution_strategy):
+  pass

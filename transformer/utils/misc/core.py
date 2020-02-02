@@ -1,13 +1,25 @@
 # -*- coding: utf-8 -*-
+from absl import flags
+
+
 from transformer import model_params
+from transformer.utils.flags import core as flags_core
+
 PARAMS_MAP = {
   'tiny': model_params.TINY_PARAMS,
   'base': model_params.BASE_PARAMS,
   'big': model_params.BIG_PARAMS,
 }
-#TODO
+
+FLAGS = flags.FLAGS
+
+# TODO
 def define_transformer_flags():
+  """Add flags and flag validators for running transformer_main."""
+  flags_core.define_base(num_gpu=True, distribution_strategy=True)
+
   pass
+
 
 def get_model_params(param_set, num_gpus):
   """Gets predefined model params."""
