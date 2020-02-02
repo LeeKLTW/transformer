@@ -3,15 +3,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import tensorflow as tf
 from absl import app
 from absl import flags
 from absl import logging
 
-from transformer import misc
+from transformer.utils import misc
 from transformer.utils.logs import logger
 from transformer.utils.misc import keras_utils
+from transformer.utils.misc import distribution_utils
 from transformer.utils.flags import core as flags_core
-
 
 INF = int(1e9)
 BLEU_DUR = "bleu"
@@ -32,6 +33,21 @@ class TransformerTask(object):
     params["model_dir"] = flags_obj.model_dir
     params["static_batch"] = flags_obj.static_batch
     params["max_length"] = flags_obj.max_length
+    params["decode_batch_size"] = flags_obj.decode_batch_size
+    params["decode_max_length"] = flags_obj.decode_max_length
+    params["padded_max_length"] = flags_obj.padded_decode
+    params["num_parallel_calls"] = (flags_obj.num_parallel_calls or
+                                    tf.data.experimental.AUTOTUNE)    #FIXME
+    params["use_synthetic_data"] = flags_obj.use_synthetic_data
+    params["batch_size"] = flags_obj.batch_size or params["default_batch_size"]
+    params["repeat_dataset"] = None
+    params["dtype"] = flags_core.get_tf_dtype(flags_obj)
+    params["enable_tensorboard"] = flags_obj.enable_tensorboard
+    params["enable_metrics_in_training"] = flags_obj.enable_metrics_in_training
+    params["steps_between_evals"] = flags_obj.steps_between_evals
+
+    self.distribution_strategy = distribution_utils.get_distribution_strategy()
+
     # TODO: continue
 
   pass
