@@ -57,4 +57,18 @@ def get_distribution_strategy(distribution_strategy="mirrored",
                        "one device.")
     return tf.distribute.OneDeviceStrategy(device="device:GPU:0")
 
-  pass
+  if distribution_strategy == "mirrored":
+    if num_gpus == 0:
+      devices = ["device:CPU:0"]
+    else:
+      devices = ["device:GPU:%d" % i for i in range(num_gpus)]
+
+    return tf.distribute.MirroredStrategy(
+      devices=devices,
+      cross_device_ops=_mirrored_cross_device_ops(all_reduce_alg, num_packs))
+
+  if distribution_strategy == "parameter_server":
+    return tf.distribute.experimental.ParameterServerStrategy()
+
+  raise ValueError(
+    "Unrecognized Distribution Strategy: %r" % distribution_strategy)
