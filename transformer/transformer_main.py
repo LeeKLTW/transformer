@@ -82,9 +82,17 @@ class TransformerTask(object):
       return isinstance(self.distribution_strategy,
                         tf.distribute.experimental.TPUStrategy)
 
+  #TODO
+  def train(self):
+    pass
 
-  pass
+  #TODO
+  def predict(self):
+    pass
 
+  #TODO
+  def eval(self):
+    pass
 
 def main(_):
   flags_obj = flags.FLAGS
