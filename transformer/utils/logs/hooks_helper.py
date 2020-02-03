@@ -98,7 +98,6 @@ def get_logging_metric_hook(tensors_to_log=None, every_n_secs=600, **kwargs):
   return metric_hook.LoggingMetricHook(tensors=tensors_to_log,
                                        metric_logger=logger.get_benchmark_logger(),
                                        every_n_secs=every_n_secs)
-  pass
 
 
 def get_step_counter_hook(**kwargs):
