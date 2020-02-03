@@ -59,7 +59,24 @@ def get_example_per_second_hook():
 
 
 # TODO
-def get_logging_metric_hook():
+def get_logging_metric_hook(tensors_to_log=None, every_n_secs=600, **kwargs):
+  """Function to get LoggingMetricHook.
+
+  Args:
+    tensors_to_log: List of tensor names or dictionary mapping labels to tensor
+      names. If not set, log _TENSORS_TO_LOG by default.
+    every_n_secs: `int`, the frequency for logging the metric. Default to every
+      10 mins.
+    **kwargs: a dictionary of arguments.
+
+  Returns:
+    Returns a LoggingMetricHook that saves tensor values in a JSON format.
+  """
+  if tensors_to_log is None:
+    tensors_to_log = _TENSORS_TO_LOG
+  return metric_hook.LoggingMetricHook(tensors=tensors_to_log,
+                                       metric_logger=logger.get_benchmark_logger(),
+                                       every_n_secs=every_n_secs)
   pass
 
 
