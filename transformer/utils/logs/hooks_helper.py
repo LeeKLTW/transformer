@@ -38,9 +38,19 @@ def get_logging_tensor_hook(every_n_iter=100, tensor_to_log=None, **kwargs):
     every_n_iter=every_n_iter)
 
 
-# TODO
-def get_profiler_hook():
-  pass
+def get_profiler_hook(model_dir, save_steps=1000, **kwargs):
+  """Function to get ProfilerHook.
+
+  Args:
+    model_dir: The directory to save the profile traces to.
+    save_steps: `int`, print profile traces every N steps.
+    **kwargs: a dictionary of arguments to ProfilerHook.
+
+  Returns:
+    Returns a ProfilerHook that writes out timelines that can be loaded into
+    profiling tools like chrome://tracing.
+  """
+  return tf.estimator.ProfilerHook(save_steps=save_steps, output_dir=model_dir)
 
 
 # TODO
