@@ -449,8 +449,7 @@ def define_benchmark():
 def define_device(tpu):
   pass
 
-#FIXME: fix flags
+define_base = register_key_flags_in_core(define_base)
+define_performance = register_key_flags_in_core(define_performance)
 define_benchmark = register_key_flags_in_core(define_benchmark)
-define_benchmark = register_key_flags_in_core(define_benchmark)
-define_benchmark = register_key_flags_in_core(define_benchmark)
-define_benchmark = register_key_flags_in_core(define_benchmark)
+define_device = register_key_flags_in_core(define_device)
