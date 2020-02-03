@@ -23,6 +23,10 @@ DTYPE_MAP = {
 }
 
 
+def set_defaults(**kwargs):
+  for key, value in kwargs.items():
+    flags.FLAGS.set_default(name=key, value=value)
+
 def register_key_flags_in_core(f):
   """Defines a function in core.py, and registers its key flags.
 
@@ -563,3 +567,5 @@ def define_device(tpu=True):
                          help=help_wrap("Number of shards (TPU chips)."))
 
   return key_flags
+
+
