@@ -18,4 +18,6 @@
 import tensorflow as tf
 from . import logger
 
-# tf.estimator.SessionRunHook not in tf1.11
+#TODO
+class ExamplePerSecondHook(object):
+  pass
