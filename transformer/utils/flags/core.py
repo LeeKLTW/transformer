@@ -208,7 +208,6 @@ def define_base(data_dir=True, model_dir=True, clean=False, train_epochs=False,
   return key_flags
 
 
-# TODO
 def define_performance(num_parallel_calls=False, inter_op=False, intra_op=False,
                        synthetic_data=False, max_train_steps=False, dtype=False,
                        all_reduce_alg=False, num_packs=False,
@@ -367,7 +366,71 @@ def define_performance(num_parallel_calls=False, inter_op=False, intra_op=False,
                                     "specified unless --dtype==fp16")
       return True
 
-  pass
+  if all_reduce_alg:
+    flags.DEFINE_string(
+      name="all_reduce_alg", short_name="ara",default=None,
+      help=help_wrap(
+        "Define algorithm to use for performing all-reduce.When specified with "
+        "MirroredStrategy for single worker, this controls "
+        "tf.contrib.distribute.AllReduceCrossTowerOps. When specified with "
+        "MultiWorkerMirroredStrategy, this controls "
+        "tf.distribute.experimental.CollectiveCommunication; valid options are "
+        "`ring` and `nccl`"))
+
+  if num_packs:
+    flags.DEFINE_integer(
+      name="num_packs",default=1,
+      help=help_wrap(
+        "Sets `num_packs` in the cross device pos used in MirroredStrategy. "
+        "For details, see tf.distribute.NcclAllReduce."))
+
+  if tf_gpu_thread_mode:
+    flags.DEFINE_string(
+      name="tf_gpu_thread_mode", short_name="gt_mode",default=None,
+      help=help_wrap(
+        "Whether and how the GPU device uses its own threadpool."))
+
+    flags.DEFINE_integer(
+      name="per_gpu_thread_count", short_name="pgtc",default=0,
+      help=help_wrap(
+        "The number of threads to use for GPU. Only valid when "
+        "tf_gpu_thread_mode is not global."))
+
+  if datasets_num_parallel_batches:
+    flags.DEFINE_integer(
+      name="datasets_num_parallel_batches",default=None,
+      help=help_wrap(
+        "Determines how many batches to process in parallel when using map and "
+        "batch from tf.data."))
+
+  if training_dataset_cache:
+    flags.DEFINE_boolean(
+      name="training_dataset_cache",default=False,
+      help=help_wrap(
+        "Determines whether to cache the training dataset on workers."
+        "Typically used to improve training performance when training data is in "
+        "remote storage and can fit into worker memory."))
+
+  if tf_data_experimental_slack:
+    flags.DEFINE_boolean(
+      name="tf_data_experimental_slack",default=False,
+      help=help_wrap(
+        "Whether to enable tf.data's `experimental_slack` option."))
+
+
+  if enable_xla:
+    flags.DEFINE_boolean(
+      name="enable_xla",default=False,
+      help=help_wrap(
+        "Whether to enable XLA auto jit compilation"))
+
+  if force_v2_in_keras_compile:
+    flags.DEFINE_integer(
+      name="force_v2_in_keras_compile",default=None,
+      help=help_wrap(
+        "Forces the use of run_distributed path even if not using a `strategy`."
+        "This is not the same as `tf.distribute.OneDeviceStrategy`."))
+  return key_flags
 
 
 # TODO
@@ -378,3 +441,9 @@ def define_benchmark():
 # TODO
 def define_device(tpu):
   pass
+
+#FIXME: fix flags
+define_benchmark = register_key_flags_in_core(define_benchmark)
+define_benchmark = register_key_flags_in_core(define_benchmark)
+define_benchmark = register_key_flags_in_core(define_benchmark)
+define_benchmark = register_key_flags_in_core(define_benchmark)
