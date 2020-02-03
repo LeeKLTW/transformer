@@ -80,7 +80,6 @@ def get_example_per_second_hook(every_n_steps=100,
     warm_steps=warm_steps, metric_logger=logger.get_benchmark_logger())
 
 
-# TODO
 def get_logging_metric_hook(tensors_to_log=None, every_n_secs=600, **kwargs):
   """Function to get LoggingMetricHook.
 
