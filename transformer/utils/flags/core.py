@@ -450,12 +450,116 @@ def define_benchmark(benchmark_log_dir=True, bigquery_uploader=True):
     benchmark_log_dir: Create a flag to specify location for benchmark logging.
     bigquery_uploader: Create flags for uploading results to BigQuery.
 
+  Returns:
+    A list of flags for core.py to marks as key flags.
+  """
 
-# TODO
-def define_device(tpu):
-  pass
+  key_flags = []
+  flags.DEFINE_enum(
+      name="benchmark_logger_type", default="BaseBenchmarkLogger",
+      enum_values=["BaseBenchmarkLogger", "BenchmarkFileLogger",
+                   "BenchmarkBigQueryLogger"],
+      help=help_wrap("The type of benchmark logger to use. Defaults to using "
+                     "BaseBenchmarkLogger which logs to STDOUT. Different "
+                     "loggers will require other flags to be able to work."))
+  flags.DEFINE_string(
+      name="benchmark_test_id", short_name="bti", default=None,
+      help=help_wrap("The unique test ID of the benchmark run. It could be the "
+                     "combination of key parameters. It is hardware "
+                     "independent and could be used compare the performance "
+                     "between different test runs. This flag is designed for "
+                     "human consumption, and does not have any impact within "
+                     "the system."))
 
-define_base = register_key_flags_in_core(define_base)
-define_performance = register_key_flags_in_core(define_performance)
-define_benchmark = register_key_flags_in_core(define_benchmark)
-define_device = register_key_flags_in_core(define_device)
+  flags.DEFINE_integer(
+      name='log_steps', default=100,
+      help='For every log_steps, we log the timing information such as '
+      'examples per second. Besides, for every log_steps, we store the '
+      'timestamp of a batch end.')
+
+  if benchmark_log_dir:
+    flags.DEFINE_string(
+        name="benchmark_log_dir", short_name="bld", default=None,
+        help=help_wrap("The location of the benchmark logging.")
+    )
+
+  if bigquery_uploader:
+    flags.DEFINE_string(
+        name="gcp_project", short_name="gp", default=None,
+        help=help_wrap(
+            "The GCP project name where the benchmark will be uploaded."))
+
+    flags.DEFINE_string(
+        name="bigquery_data_set", short_name="bds", default="test_benchmark",
+        help=help_wrap(
+            "The Bigquery dataset name where the benchmark will be uploaded."))
+
+    flags.DEFINE_string(
+        name="bigquery_run_table", short_name="brt", default="benchmark_run",
+        help=help_wrap("The Bigquery table name where the benchmark run "
+                       "information will be uploaded."))
+
+    flags.DEFINE_string(
+        name="bigquery_run_status_table", short_name="brst",
+        default="benchmark_run_status",
+        help=help_wrap("The Bigquery table name where the benchmark run "
+                       "status information will be uploaded."))
+
+    flags.DEFINE_string(
+        name="bigquery_metric_table", short_name="bmt",
+        default="benchmark_metric",
+        help=help_wrap("The Bigquery table name where the benchmark metric "
+                       "information will be uploaded."))
+
+  @flags.multi_flags_validator(
+      ["benchmark_logger_type", "benchmark_log_dir"],
+      message="--benchmark_logger_type=BenchmarkFileLogger will require "
+              "--benchmark_log_dir being set")
+  def _check_benchmark_log_dir(flags_dict):
+    benchmark_logger_type = flags_dict["benchmark_logger_type"]
+    if benchmark_logger_type == "BenchmarkFileLogger":
+      return flags_dict["benchmark_log_dir"]
+    return True
+
+  return key_flags
+
+
+@register_key_flags_in_core
+def define_device(tpu=True):
+  """Register device specific flags.
+  Args:
+    tpu: Create flags to specify TPU operation.
+  Returns:
+    A list of flags for core.py to marks as key flags.
+  """
+
+  key_flags = []
+
+  if tpu:
+    flags.DEFINE_string(
+        name="tpu", default=None,
+        help=help_wrap(
+            "The Cloud TPU to use for training. This should be either the name "
+            "used when creating the Cloud TPU, or a "
+            "grpc://ip.address.of.tpu:8470 url. Passing `local` will use the"
+            "CPU of the local instance instead. (Good for debugging.)"))
+    key_flags.append("tpu")
+
+    flags.DEFINE_string(
+        name="tpu_zone", default=None,
+        help=help_wrap(
+            "[Optional] GCE zone where the Cloud TPU is located in. If not "
+            "specified, we will attempt to automatically detect the GCE "
+            "project from metadata."))
+
+    flags.DEFINE_string(
+        name="tpu_gcp_project", default=None,
+        help=help_wrap(
+            "[Optional] Project name for the Cloud TPU-enabled project. If not "
+            "specified, we will attempt to automatically detect the GCE "
+            "project from metadata."))
+
+    flags.DEFINE_integer(name="num_tpu_shards", default=8,
+                         help=help_wrap("Number of shards (TPU chips)."))
+
+  return key_flags
