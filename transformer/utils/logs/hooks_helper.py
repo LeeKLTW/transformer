@@ -57,7 +57,6 @@ def get_profiler_hook(model_dir, save_steps=1000, **kwargs):
   return tf.estimator.ProfilerHook(save_steps=save_steps, output_dir=model_dir)
 
 
-# TODO
 def get_example_per_second_hook(every_n_steps=100,
                                 batch_size=128,
                                 warm_steps=5,
