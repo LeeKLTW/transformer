@@ -103,9 +103,9 @@ def get_logging_metric_hook(tensors_to_log=None, every_n_secs=600, **kwargs):
   pass
 
 
-# TODO
-def get_step_counter_hook():
-  pass
+def get_step_counter_hook(**kwargs):
+  """Function to get StepCounterHook."""
+  return tf.estimator.StepCounterHook()
 
 
 HOOKS = {'loggingtensorhook': get_logging_tensor_hook,
