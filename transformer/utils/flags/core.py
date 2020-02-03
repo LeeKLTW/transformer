@@ -396,6 +396,13 @@ def define_performance(num_parallel_calls=False, inter_op=False, intra_op=False,
         "The number of threads to use for GPU. Only valid when "
         "tf_gpu_thread_mode is not global."))
 
+  if datasets_num_private_threads:
+    flags.DEFINE_integer(
+      name="datasets_num_private_threads",default=None,
+      help=help_wrap(
+        "Number of threads for a private threadpool created for all datasets "
+        "computation."))
+
   if datasets_num_parallel_batches:
     flags.DEFINE_integer(
       name="datasets_num_parallel_batches",default=None,
