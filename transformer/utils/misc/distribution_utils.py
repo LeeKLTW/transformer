@@ -3,7 +3,6 @@ import tensorflow as tf
 from transformer.utils.misc import tpu_lib
 
 
-# TODO
 def _collective_communication(all_reduce_alg):
   """Return a CollectiveCommunication based on all_reduce_alg.
 
@@ -17,7 +16,16 @@ def _collective_communication(all_reduce_alg):
   Raises:
     ValueError: if `all_reduce_alg` not in [None, 'ring', 'nccl']
   """
-  pass
+  collective_communication_options = {
+    None: tf.distribute.experimental.CollectiveCommunication.AUTO,
+    'ring': tf.distribute.experimental.CollectiveCommunication.RING,
+    'nccl': tf.distribute.experimental.CollectiveCommunication.NCCL
+  }
+  if all_reduce_alg not in collective_communication_options:
+    raise ValueError("When used with `multi_worker_mirrored`, valid values for "
+                     "all_reduce_alg are [`ring`,`nccl`]. Supplied value: {}"
+                     .format(all_reduce_alg))
+  return collective_communication_options[all_reduce_alg]
 
 
 # TODO
