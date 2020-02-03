@@ -13,10 +13,28 @@ PARAMS_MAP = {
 
 FLAGS = flags.FLAGS
 
-# TODO
 def define_transformer_flags():
   """Add flags and flag validators for running transformer_main."""
   flags_core.define_base(num_gpu=True, distribution_strategy=True)
+  flags_core.define_performance(
+      num_parallel_calls=True,
+      inter_op=False,
+      intra_op=False,
+      synthetic_data=True,
+      max_train_steps=False,
+      dtype=True,
+      loss_scale=True,
+      all_reduce_alg=True,
+      num_packs=True,
+      tf_gpu_thread_mode=True,
+      datasets_num_private_threads=True,
+      enable_xla=True,
+      force_v2_in_keras_compile=True,
+      fp16_implementation=True
+  )
+  flags_core.define_benchmark()
+  flags_core.define_device(tpu=True)
+  # TODO:continue
 
   pass
 
