@@ -11,6 +11,10 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+from transformer.utils.logs import hooks
+from transformer.utils.logs import logger
+from transformer.utils.logs import metric_hook
+
 _TENSORS_TO_LOG = dict((x, x) for x in ['learning_rate',
                                         'cross_entropy',
                                         'train_accuracy'])
@@ -54,8 +58,27 @@ def get_profiler_hook(model_dir, save_steps=1000, **kwargs):
 
 
 # TODO
-def get_example_per_second_hook():
-  pass
+def get_example_per_second_hook(every_n_steps=100,
+                                batch_size=128,
+                                warm_steps=5,
+                                **kwargs):
+  """Function to get ExamplesPerSecondHook.
+
+  Args:
+    every_n_steps: `int`, print current and average examples per second every
+      N steps.
+    batch_size: `int`, total batch size used to calculate examples/second from
+      global time.
+    warm_steps: skip this number of steps before logging and running average.
+    **kwargs: a dictionary of arguments to ExamplesPerSecondHook.
+
+  Returns:
+    Returns a ProfilerHook that writes out timelines that can be loaded into
+    profiling tools like chrome://tracing.
+  """
+  return hooks.ExamplePerSecondHook(
+    batch_size=batch_size, every_n_steps=every_n_steps,
+    warm_steps=warm_steps, metric_logger=logger.get_benchmark_logger())
 
 
 # TODO
