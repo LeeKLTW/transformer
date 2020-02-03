@@ -93,6 +93,7 @@ def get_loss_scale(flags_obj, default_for_fp16):
     return default_for_fp16
 
 
+@register_key_flags_in_core
 def define_base(data_dir=True, model_dir=True, clean=False, train_epochs=False,
                 epochs_between_evals=False, stop_threshold=False,
                 batch_size=True, num_gpu=False, hooks=False, export_dir=False,
@@ -208,6 +209,7 @@ def define_base(data_dir=True, model_dir=True, clean=False, train_epochs=False,
   return key_flags
 
 
+@register_key_flags_in_core
 def define_performance(num_parallel_calls=False, inter_op=False, intra_op=False,
                        synthetic_data=False, max_train_steps=False, dtype=False,
                        all_reduce_alg=False, num_packs=False,
@@ -440,9 +442,13 @@ def define_performance(num_parallel_calls=False, inter_op=False, intra_op=False,
   return key_flags
 
 
-# TODO
-def define_benchmark():
-  pass
+@register_key_flags_in_core
+def define_benchmark(benchmark_log_dir=True, bigquery_uploader=True):
+  """Register benchmarking flags.
+
+  Args:
+    benchmark_log_dir: Create a flag to specify location for benchmark logging.
+    bigquery_uploader: Create flags for uploading results to BigQuery.
 
 
 # TODO
